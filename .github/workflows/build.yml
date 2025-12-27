@@ -47,15 +47,37 @@ jobs:
 
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
+        timeout-minutes: 20
         run: |
+          brew update
           brew install libheif
 
-      - name: Build
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install msys2 -y
+          refreshenv
+          C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-libheif mingw-w64-x86_64-pkg-config"
+
+      - name: Build (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 1
         run: |
+          go build -ldflags "-s -w" -o bin/${{ matrix.binary_name }} ./cmd/convert
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 1
+          CGO_CFLAGS: -IC:/tools/msys64/mingw64/include
+          CGO_LDFLAGS: -LC:/tools/msys64/mingw64/lib
+        run: |
+          $env:PATH = "C:\tools\msys64\mingw64\bin;C:\tools\msys64\usr\bin;$env:PATH"
           go build -ldflags "-s -w" -o bin/${{ matrix.binary_name }} ./cmd/convert
 
       - name: Upload artifacts
