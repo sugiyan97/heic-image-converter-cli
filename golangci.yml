@@ -1,0 +1,19 @@
+linters:
+  # 全ての linter を無効化
+  disable-all: true
+  # 指定した linter のみ有効化
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - revive
+
+run:
+  timeout: 5m
+  tests: true
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck

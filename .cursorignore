@@ -1,0 +1,11 @@
+# .env
+.env
+.env.*
+
+# OSX
+.DS_Store
+
+# tmp
+/tmp/*
+!/tmp/.gitkeep
+!/tmp/.keep
