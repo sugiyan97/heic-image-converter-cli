@@ -44,7 +44,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&checkEXIF, "check-exif", false, "JPEGファイルのEXIF情報の有無をチェックします")
 }
 
-func runConvert(_cmd *cobra.Command, args []string) error {
+func runConvert(_ *cobra.Command, args []string) error {
 	// EXIFチェックモード
 	if checkEXIF {
 		return runCheckEXIF(args)
