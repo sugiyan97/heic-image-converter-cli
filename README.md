@@ -65,7 +65,7 @@ GitHub Releasesから各プラットフォーム用のバイナリをダウン�
 - **Go**: 1.23以上
 - **CGO**: 有効（`goheif`ライブラリの要件）
 - **システム依存ライブラリ**:
-  - **Linux**: `libheif-dev`, `libde265-dev`, `x265-dev`
+  - **Linux**: `libheif-dev`, `libde265-dev`, `libx265-dev`
   - **macOS**: Homebrewで`libheif`をインストール
   - **Windows**: 適切なCライブラリが必要
 
@@ -179,7 +179,7 @@ convert --check-exif ~/Pictures/iPhone
 **解決方法**:
 - CGOが有効になっているか確認: `CGO_ENABLED=1`
 - 必要なシステムライブラリがインストールされているか確認
-  - Linux: `sudo apt-get install libheif-dev libde265-dev x265-dev`
+  - Linux: `sudo apt-get install libheif-dev libde265-dev libx265-dev`
   - macOS: `brew install libheif`
 
 #### 変換エラー: ファイルが見つからない
