@@ -831,11 +831,15 @@ func TestRunConvertMode_TC00205(t *testing.T) {
 	os.Stdout = w
 
 	_ = runConvertMode(args)
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Logf("Failed to close pipe writer: %v", err)
+	}
 	os.Stdout = oldStdout
 
 	// Read captured output
-	buf.ReadFrom(r)
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Logf("Failed to read from pipe: %v", err)
+	}
 	output := buf.String()
 
 	// runConvertMode may not return error, but should display error message
@@ -1052,7 +1056,9 @@ func TestRunConvertMode_TC00702(t *testing.T) {
 	os.Stdout = w
 
 	err := runConvertMode(args)
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Logf("Failed to close pipe writer: %v", err)
+	}
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -1060,7 +1066,9 @@ func TestRunConvertMode_TC00702(t *testing.T) {
 	}
 
 	// Read captured output
-	buf.ReadFrom(r)
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Logf("Failed to read from pipe: %v", err)
+	}
 	output := buf.String()
 
 	// Check that output file was created
@@ -1093,7 +1101,9 @@ func TestRunConvertMode_TC00703(t *testing.T) {
 	os.Stdout = w
 
 	err := runConvertMode(args)
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Logf("Failed to close pipe writer: %v", err)
+	}
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -1101,7 +1111,9 @@ func TestRunConvertMode_TC00703(t *testing.T) {
 	}
 
 	// Read captured output
-	buf.ReadFrom(r)
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Logf("Failed to read from pipe: %v", err)
+	}
 	output := buf.String()
 
 	// Check that files were converted
@@ -1167,11 +1179,15 @@ func TestRunConvertMode_TC00902(t *testing.T) {
 	os.Stdout = w
 
 	_ = runConvertMode(args)
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Logf("Failed to close pipe writer: %v", err)
+	}
 	os.Stdout = oldStdout
 
 	// Read captured output
-	buf.ReadFrom(r)
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Logf("Failed to read from pipe: %v", err)
+	}
 	output := buf.String()
 
 	// Check error message contains expected text
@@ -1218,7 +1234,9 @@ func TestRunConvertMode_TC00904(t *testing.T) {
 	os.Stdout = w
 
 	err := runConvertMode(args)
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Logf("Failed to close pipe writer: %v", err)
+	}
 	os.Stdout = oldStdout
 
 	if err != nil {
@@ -1226,7 +1244,9 @@ func TestRunConvertMode_TC00904(t *testing.T) {
 	}
 
 	// Read captured output
-	buf.ReadFrom(r)
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Logf("Failed to read from pipe: %v", err)
+	}
 	output := buf.String()
 
 	// Check that output file was created (conversion should succeed even if EXIF processing fails)

@@ -24,7 +24,7 @@ type ConvertOptions struct {
 }
 
 // ConvertHEICToJPEG converts a HEIC file to JPEG format
-func ConvertHEICToJPEG(inputPath string, options ConvertOptions) error {
+func ConvertHEICToJPEG(inputPath string, _options ConvertOptions) error {
 	// Open HEIC file
 	file, err := os.Open(inputPath)
 	if err != nil {
