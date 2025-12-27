@@ -84,19 +84,23 @@ jobs:
   create-release:
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            convert-linux-amd64/convert-linux-amd64
-            convert-windows-amd64.exe/convert-windows-amd64.exe
-            convert-darwin-arm64/convert-darwin-arm64
+            artifacts/convert-linux-amd64/convert-linux-amd64
+            artifacts/convert-windows-amd64.exe/convert-windows-amd64.exe
+            artifacts/convert-darwin-arm64/convert-darwin-arm64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
