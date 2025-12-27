@@ -1,0 +1,31 @@
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "golang.go",
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "golang.go",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "go.formatTool": "goimports",
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "file",
+    "go.lintFlags": [
+        "--fast",
+        "--config",
+        "${workspaceFolder}/golangci.yml"
+    ],
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "go.useLanguageServer": true,
+    "gopls": {
+        "staticcheck": true
+    },
+    "go.testFlags": [
+        "-v"
+    ],
+    "go.testOnSave": true,
+    "go.vetOnSave": "off"
+}
