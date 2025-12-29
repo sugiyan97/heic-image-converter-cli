@@ -52,11 +52,73 @@ convert --remove-exif photo.HEIC
 
 ## インストール
 
-### ビルド済みバイナリを使用する場合
+### ビルド済みバイナリを使用する場合（推奨）
 
-GitHub Releasesから各プラットフォーム用のバイナリをダウンロードしてください。
+GitHub Releasesから各プラットフォーム用のZIPファイルをダウンロードしてインストールします。
 
 - [最新リリース](https://github.com/sugiyan97/heic-image-converter-cli/releases/latest)
+
+#### macOS の場合
+
+1. `convert-darwin-arm64.zip`をダウンロード
+2. ZIPファイルを展開
+3. ターミナルで展開したディレクトリに移動し、以下を実行：
+   ```bash
+   chmod +x install.sh
+   ./install.sh
+   ```
+4. インストール先は自動的に`~/bin/HeicConverter`に設定されます
+5. PATH設定の確認（Y/n）で、Yを選択するとPATHに自動追加されます
+
+#### Windows の場合
+
+1. `convert-windows-amd64.zip`をダウンロード
+2. ZIPファイルを展開
+3. PowerShellまたはコマンドプロンプトで展開したディレクトリに移動し、以下を実行：
+   ```powershell
+   # PowerShellの場合
+   .\install.ps1
+   ```
+   または
+   ```cmd
+   # コマンドプロンプトの場合
+   install.bat
+   ```
+4. インストール先は自動的に`%USERPROFILE%\bin\HeicConverter`に設定されます
+5. PATH設定の確認（Y/n）で、Yを選択するとPATHに自動追加されます
+
+#### 固定インストール先
+
+- **macOS**: `~/bin/HeicConverter`
+- **Windows**: `%USERPROFILE%\bin\HeicConverter`
+
+インストール先は固定されており、変更できません。これにより、シンプルで一貫したインストール体験を提供します。
+
+#### アップデート
+
+新しいバージョンをインストールする場合は、同じ手順でインストールスクリプトを実行してください。既存のバイナリが自動的に上書きされます。
+
+#### アンインストール
+
+以下のいずれかの方法でアンインストールできます：
+
+1. **バイナリから直接実行**（推奨）:
+   ```bash
+   convert --uninstall
+   ```
+
+2. **アンインストールスクリプトを直接実行**:
+   ```bash
+   # macOS
+   ~/bin/HeicConverter/uninstall.sh
+   
+   # Windows
+   %USERPROFILE%\bin\HeicConverter\uninstall.ps1
+   # または
+   %USERPROFILE%\bin\HeicConverter\uninstall.bat
+   ```
+
+アンインストール時は、`HeicConverter`フォルダ全体が削除されます。PATH設定も削除するかどうかを選択できます。
 
 ### ソースからビルドする場合
 
@@ -207,6 +269,46 @@ convert --check-exif ~/Pictures/iPhone
 **解決方法**:
 - 元のHEICファイルにEXIF情報が含まれているか確認
 - 他のツール（例: `exiftool`）でEXIF情報を確認
+
+#### インストールエラー: スクリプトの実行権限がない（macOS）
+
+**問題**: `./install.sh`を実行すると「Permission denied」エラーが表示される
+
+**解決方法**:
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+#### インストールエラー: PowerShell実行ポリシー（Windows）
+
+**問題**: PowerShellスクリプトが実行できない
+
+**解決方法**:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+または、バッチファイル（`install.bat`）を使用してください。
+
+#### インストール後、`convert`コマンドが見つからない
+
+**問題**: インストール後も`convert`コマンドが実行できない
+
+**解決方法**:
+- PATH設定を確認してください
+- 新しいターミナル/コマンドプロンプトを開いてください
+- 手動でPATHに追加する場合は、以下を実行：
+  - macOS: `export PATH="$HOME/bin/HeicConverter:$PATH"`をシェル設定ファイルに追加
+  - Windows: 環境変数の設定から`%USERPROFILE%\bin\HeicConverter`をPATHに追加
+
+#### Windows: DLLが見つからないエラー
+
+**問題**: `libstdc++-6.dll`、`libwinpthread-1.dll`、`libgcc_s_seh-1.dll`が見つからない
+
+**解決方法**:
+- MinGWのランタイムDLLが必要です
+- MSYS2/MinGWがインストールされている場合、`C:\tools\msys64\mingw64\bin`をPATHに追加してください
+- または、必要なDLLを`%USERPROFILE%\bin\HeicConverter`にコピーしてください
 
 ### サポート
 

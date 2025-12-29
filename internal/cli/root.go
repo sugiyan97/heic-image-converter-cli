@@ -5,6 +5,9 @@ package cli
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 
 	"github.com/spf13/cobra"
 	"github.com/sugiyan97/heic-image-converter-cli/internal/converter"
@@ -15,6 +18,7 @@ var (
 	showEXIF    bool
 	removeEXIF  bool
 	checkEXIF   bool
+	uninstall   bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -42,9 +46,15 @@ func init() {
 	rootCmd.Flags().BoolVar(&showEXIF, "show-exif", false, "EXIF情報を表示します")
 	rootCmd.Flags().BoolVar(&removeEXIF, "remove-exif", false, "EXIF情報を削除して変換します")
 	rootCmd.Flags().BoolVar(&checkEXIF, "check-exif", false, "JPEGファイルのEXIF情報の有無をチェックします")
+	rootCmd.Flags().BoolVar(&uninstall, "uninstall", false, "アンインストールを実行します")
 }
 
 func runConvert(_ *cobra.Command, args []string) error {
+	// アンインストールモード
+	if uninstall {
+		return runUninstall()
+	}
+
 	// EXIFチェックモード
 	if checkEXIF {
 		return runCheckEXIF(args)
@@ -261,6 +271,56 @@ func runConvertMode(args []string) error {
 		fmt.Printf("\n=== 変換結果 ===\n")
 		fmt.Printf("変換成功: %d\n", successCount)
 		fmt.Printf("変換失敗: %d\n", errorCount)
+	}
+
+	return nil
+}
+
+func runUninstall() error {
+	// ホームディレクトリを取得
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("ホームディレクトリを取得できませんでした: %w", err)
+	}
+
+	// 固定インストール先
+	var installDir string
+	var uninstallScript string
+	var cmd *exec.Cmd
+
+	if runtime.GOOS == "windows" {
+		installDir = filepath.Join(homeDir, "bin", "HeicConverter")
+		uninstallScript = filepath.Join(installDir, "uninstall.ps1")
+		
+		// PowerShellスクリプトが存在するか確認
+		if _, err := os.Stat(uninstallScript); os.IsNotExist(err) {
+			// バッチファイルを試す
+			uninstallScript = filepath.Join(installDir, "uninstall.bat")
+			if _, err := os.Stat(uninstallScript); os.IsNotExist(err) {
+				return fmt.Errorf("アンインストールスクリプトが見つかりません: %s", installDir)
+			}
+			cmd = exec.Command("cmd", "/c", uninstallScript)
+		} else {
+			cmd = exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", uninstallScript)
+		}
+	} else {
+		installDir = filepath.Join(homeDir, "bin", "HeicConverter")
+		uninstallScript = filepath.Join(installDir, "uninstall.sh")
+		
+		if _, err := os.Stat(uninstallScript); os.IsNotExist(err) {
+			return fmt.Errorf("アンインストールスクリプトが見つかりません: %s", installDir)
+		}
+		cmd = exec.Command("bash", uninstallScript)
+	}
+
+	// アンインストールスクリプトを実行
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	fmt.Printf("アンインストールスクリプトを実行します: %s\n", uninstallScript)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("アンインストールスクリプトの実行に失敗しました: %w", err)
 	}
 
 	return nil
