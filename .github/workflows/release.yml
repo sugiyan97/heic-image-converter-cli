@@ -75,11 +75,50 @@ jobs:
           $env:PATH = "C:\tools\msys64\mingw64\bin;C:\tools\msys64\usr\bin;$env:PATH"
           go build -ldflags "-s -w" -o bin/${{ matrix.binary_name }} ./cmd/convert
 
+      - name: Create ZIP package (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir -p dist
+          cp bin/${{ matrix.binary_name }} dist/
+          cp scripts/install.sh dist/
+          cp scripts/uninstall.sh dist/
+          chmod +x dist/install.sh dist/uninstall.sh
+          cd dist
+          zip -r ../convert-darwin-arm64.zip .
+          cd ..
+
+      - name: Create ZIP package (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir dist
+          copy bin\${{ matrix.binary_name }} dist\
+          copy scripts\install.ps1 dist\
+          copy scripts\install.bat dist\
+          copy scripts\uninstall.ps1 dist\
+          copy scripts\uninstall.bat dist\
+          cd dist
+          powershell Compress-Archive -Path * -DestinationPath ..\convert-windows-amd64.zip -Force
+          cd ..
+
+      - name: Create ZIP package (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p dist
+          cp bin/${{ matrix.binary_name }} dist/
+          cp scripts/install.sh dist/
+          cp scripts/uninstall.sh dist/
+          chmod +x dist/install.sh dist/uninstall.sh
+          cd dist
+          zip -r ../convert-linux-amd64.zip .
+          cd ..
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.binary_name }}
-          path: bin/${{ matrix.binary_name }}
+          path: |
+            bin/${{ matrix.binary_name }}
+            convert-*.zip
 
   create-release:
     needs: release
@@ -99,8 +138,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/convert-linux-amd64/convert-linux-amd64
-            artifacts/convert-windows-amd64.exe/convert-windows-amd64.exe
-            artifacts/convert-darwin-arm64/convert-darwin-arm64
+            artifacts/convert-darwin-arm64/convert-darwin-arm64.zip
+            artifacts/convert-windows-amd64.exe/convert-windows-amd64.zip
+            artifacts/convert-linux-amd64/convert-linux-amd64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
