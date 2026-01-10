@@ -63,9 +63,15 @@ GitHub Releasesから各プラットフォーム用のZIPファイルをダウ�
 1. `convert-darwin-arm64.zip`をダウンロード
 2. ZIPファイルを展開
 3. ターミナルで展開したディレクトリに移動し、以下を実行：
+
+   ```bash
+   ./install.sh
+   ```
+
+   必要であれば、実行権限を付与：
+
    ```bash
    chmod +x install.sh
-   ./install.sh
    ```
 4. インストール先は自動的に`~/bin/HeicConverter`に設定されます
 5. PATH設定の確認（Y/n）で、Yを選択するとPATHに自動追加されます
