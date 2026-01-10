@@ -1,5 +1,7 @@
 @echo off
 REM HEIC Image Converter アンインストールスクリプト (Windows Batch)
+REM UTF-8文字化け対策
+chcp 65001 >nul 2>&1
 
 setlocal enabledelayedexpansion
 
@@ -23,6 +25,19 @@ if /i not "!RESPONSE!"=="y" (
     exit /b 0
 )
 
+REM 削除対象ファイルの確認
+echo [INFO] 削除対象ファイルを確認しています...
+set "DLL_COUNT=0"
+if exist "%INSTALL_DIR%\libgcc_s_seh-1.dll" set /a DLL_COUNT+=1
+if exist "%INSTALL_DIR%\libwinpthread-1.dll" set /a DLL_COUNT+=1
+if exist "%INSTALL_DIR%\libstdc++-6.dll" set /a DLL_COUNT+=1
+if exist "%INSTALL_DIR%\convert.exe" (
+    echo [INFO] バイナリファイル: convert.exe
+)
+if !DLL_COUNT! gtr 0 (
+    echo [INFO] DLLファイル: !DLL_COUNT! 個
+)
+
 REM 最終確認
 echo [WARN] 警告: %INSTALL_DIR% フォルダ全体が削除されます。
 set /p RESPONSE2="続行しますか？ (y/N): "
@@ -31,7 +46,7 @@ if /i not "!RESPONSE2!"=="y" (
     exit /b 0
 )
 
-REM フォルダごと削除
+REM フォルダごと削除（バイナリ、DLL、スクリプトを含む）
 echo [INFO] インストールフォルダを削除しています...
 rd /s /q "%INSTALL_DIR%"
 echo [INFO] インストールフォルダを削除しました。
@@ -52,7 +67,7 @@ if /i "!PATH_RESPONSE!"=="y" (
         set "NEW_PATH=!NEW_PATH:%INSTALL_DIR%;=!"
         set "NEW_PATH=!NEW_PATH:;%INSTALL_DIR%=!"
         set "NEW_PATH=!NEW_PATH:%INSTALL_DIR%=!"
-        reg add "HKCU\Environment" /v Path /t REG_EXPAND_SZ /d "!NEW_PATH!" /f >nul
+        reg add "HKCU\Environment" /v Path /t REG_EXPAND_SZ /d "!NEW_PATH!" /f >nul 2>&1
         echo [INFO] PATH設定を削除しました。
         echo [INFO] 新しいコマンドプロンプトまたはPowerShellを開いてください。
     ) else (

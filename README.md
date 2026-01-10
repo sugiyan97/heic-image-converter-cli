@@ -63,9 +63,15 @@ GitHub Releasesから各プラットフォーム用のZIPファイルをダウ�
 1. `convert-darwin-arm64.zip`をダウンロード
 2. ZIPファイルを展開
 3. ターミナルで展開したディレクトリに移動し、以下を実行：
+
+   ```bash
+   ./install.sh
+   ```
+
+   必要であれば、実行権限を付与：
+
    ```bash
    chmod +x install.sh
-   ./install.sh
    ```
 4. インストール先は自動的に`~/bin/HeicConverter`に設定されます
 5. PATH設定の確認（Y/n）で、Yを選択するとPATHに自動追加されます
@@ -280,15 +286,32 @@ chmod +x install.sh
 ./install.sh
 ```
 
+#### インストールスクリプトの文字化け（Windows）
+
+**問題**: `install.bat`や`uninstall.bat`を実行すると日本語が文字化けする
+
+**解決方法**:
+- 最新のリリースでは文字化け対策が含まれています。最新版をダウンロードしてください
+- それでも文字化けする場合は、コマンドプロンプトのコードページをUTF-8に変更:
+  ```cmd
+  chcp 65001
+  ```
+
 #### インストールエラー: PowerShell実行ポリシー（Windows）
 
 **問題**: PowerShellスクリプトが実行できない
 
 **解決方法**:
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-または、バッチファイル（`install.bat`）を使用してください。
+- **推奨**: バッチファイル（`install.bat`、`uninstall.bat`）を使用してください
+- または、実行ポリシーを変更:
+  ```powershell
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
+- または、実行ポリシーをバイパスして実行:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\install.ps1
+  powershell -ExecutionPolicy Bypass -File .\uninstall.ps1
+  ```
 
 #### インストール後、`convert`コマンドが見つからない
 
@@ -306,9 +329,11 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 **問題**: `libstdc++-6.dll`、`libwinpthread-1.dll`、`libgcc_s_seh-1.dll`が見つからない
 
 **解決方法**:
-- MinGWのランタイムDLLが必要です
-- MSYS2/MinGWがインストールされている場合、`C:\tools\msys64\mingw64\bin`をPATHに追加してください
-- または、必要なDLLを`%USERPROFILE%\bin\HeicConverter`にコピーしてください
+- **最新のリリース（v1.0.1以降）**: 必要なDLLはZIPファイルに同梱されています。ZIPファイルを展開した際に、バイナリと同じディレクトリにDLLが含まれていることを確認してください
+- **古いバージョンを使用している場合**:
+  - MSYS2/MinGWがインストールされている場合、`C:\tools\msys64\mingw64\bin`をPATHに追加してください
+  - または、必要なDLLを`%USERPROFILE%\bin\HeicConverter`にコピーしてください
+  - 必要なDLL: `libgcc_s_seh-1.dll`、`libwinpthread-1.dll`、`libstdc++-6.dll`
 
 ### サポート
 
