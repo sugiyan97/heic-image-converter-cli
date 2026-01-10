@@ -1,4 +1,17 @@
 # HEIC Image Converter アンインストールスクリプト (Windows PowerShell)
+#
+# 実行ポリシーエラーが発生する場合:
+# PowerShellの実行ポリシーが制限されている場合、以下のいずれかの方法で実行してください:
+#
+# 方法1: 実行ポリシーをバイパスして実行
+#   powershell -ExecutionPolicy Bypass -File .\uninstall.ps1
+#
+# 方法2: 実行ポリシーを変更（推奨）
+#   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+#   その後、通常通り .\uninstall.ps1 を実行
+#
+# 方法3: uninstall.bat を使用（推奨）
+#   コマンドプロンプトまたはPowerShellで uninstall.bat を実行
 
 $ErrorActionPreference = "Stop"
 
@@ -35,6 +48,24 @@ if ($Response -ne "y" -and $Response -ne "Y") {
     exit 0
 }
 
+# 削除対象ファイルの確認
+Write-Info "削除対象ファイルを確認しています..."
+$DllFiles = @("libgcc_s_seh-1.dll", "libwinpthread-1.dll", "libstdc++-6.dll")
+$DllCount = 0
+foreach ($DllFile in $DllFiles) {
+    $DllPath = Join-Path $InstallDir $DllFile
+    if (Test-Path $DllPath) {
+        $DllCount++
+    }
+}
+$BinaryPath = Join-Path $InstallDir "convert.exe"
+if (Test-Path $BinaryPath) {
+    Write-Info "バイナリファイル: convert.exe"
+}
+if ($DllCount -gt 0) {
+    Write-Info "DLLファイル: $DllCount 個"
+}
+
 # 最終確認
 Write-Warn "警告: $InstallDir フォルダ全体が削除されます。"
 $Response2 = Read-Host "続行しますか？ (y/N)"
@@ -43,7 +74,7 @@ if ($Response2 -ne "y" -and $Response2 -ne "Y") {
     exit 0
 }
 
-# フォルダごと削除
+# フォルダごと削除（バイナリ、DLL、スクリプトを含む）
 Write-Info "インストールフォルダを削除しています..."
 Remove-Item -Path $InstallDir -Recurse -Force
 Write-Info "インストールフォルダを削除しました。"

@@ -51,6 +51,24 @@ if (Test-Path $BinaryDest) {
 Write-Info "バイナリをコピーしています..."
 Copy-Item -Path $BinaryPath -Destination $BinaryDest -Force
 
+# MinGWランタイムDLLのコピー
+Write-Info "必要なDLLファイルをコピーしています..."
+$DllFiles = @("libgcc_s_seh-1.dll", "libwinpthread-1.dll", "libstdc++-6.dll")
+$DllCount = 0
+foreach ($DllFile in $DllFiles) {
+    $DllSource = Join-Path $ScriptDir $DllFile
+    if (Test-Path $DllSource) {
+        $DllDest = Join-Path $InstallDir $DllFile
+        Copy-Item -Path $DllSource -Destination $DllDest -Force
+        $DllCount++
+    }
+}
+if ($DllCount -gt 0) {
+    Write-Info "$DllCount 個のDLLファイルをコピーしました。"
+} else {
+    Write-Warn "DLLファイルが見つかりませんでした。バイナリが正常に動作しない可能性があります。"
+}
+
 # アンインストールスクリプトのコピー
 $UninstallPS1Source = Join-Path $ScriptDir $UninstallScriptPS1
 $UninstallBATSource = Join-Path $ScriptDir $UninstallScriptBAT

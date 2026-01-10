@@ -96,6 +96,10 @@ jobs:
           copy scripts\install.bat dist\
           copy scripts\uninstall.ps1 dist\
           copy scripts\uninstall.bat dist\
+          REM MinGWランタイムDLLをコピー
+          copy C:\tools\msys64\mingw64\bin\libgcc_s_seh-1.dll dist\ 2>nul
+          copy C:\tools\msys64\mingw64\bin\libwinpthread-1.dll dist\ 2>nul
+          copy C:\tools\msys64\mingw64\bin\libstdc++-6.dll dist\ 2>nul
           cd dist
           powershell Compress-Archive -Path * -DestinationPath ..\convert-windows-amd64.zip -Force
           cd ..
