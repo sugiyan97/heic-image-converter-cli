@@ -1,6 +1,6 @@
 module github.com/sugiyan97/heic-image-converter-cli
 
-go 1.23
+go 1.25.6
 
 require (
 	github.com/adrium/goheif v0.0.0-20230113233934-ca402e77a786

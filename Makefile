@@ -61,7 +61,7 @@ test-coverage: ## Run tests with coverage
 lint: ## Run linter
 	@echo "Running linter..."
 	@if command -v golangci-lint > /dev/null; then \
-		golangci-lint run; \
+		golangci-lint run --config golangci.yml --timeout=5m; \
 	else \
 		echo "golangci-lint is not installed. Install it from https://golangci-lint.run/"; \
 	fi
