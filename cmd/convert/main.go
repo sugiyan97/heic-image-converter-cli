@@ -1,3 +1,4 @@
+// Package main provides the entry point for the HEIC image converter CLI.
 package main
 
 import (
