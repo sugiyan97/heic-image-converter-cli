@@ -1,5 +1,3 @@
-version: 1.60
-
 linters:
   # 全ての linter を無効化
   disable-all: true
