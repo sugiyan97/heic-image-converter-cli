@@ -1,6 +1,6 @@
 # HEIC Image Converter
 
-[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/Go-1.25.6+-00ADD8?style=flat-square&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![GitHub](https://img.shields.io/badge/GitHub-sugiyan97%2Fheic--image--converter--cli-black?style=flat-square&logo=github)](https://github.com/sugiyan97/heic-image-converter-cli)
 
@@ -130,7 +130,7 @@ GitHub Releasesから各プラットフォーム用のZIPファイルをダウ�
 
 #### 前提条件
 
-- **Go**: 1.23以上
+- **Go**: 1.25.6以上
 - **CGO**: 有効（`goheif`ライブラリの要件）
 - **システム依存ライブラリ**:
   - **Linux**: `libheif-dev`, `libde265-dev`, `libx265-dev`

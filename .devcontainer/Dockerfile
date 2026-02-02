@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/go:1.23
+FROM mcr.microsoft.com/devcontainers/go:1.25
 
 # libde265 とその他の必要な依存関係をインストール
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
