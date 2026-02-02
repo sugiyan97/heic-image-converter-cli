@@ -1,3 +1,5 @@
+version: "2"
+
 linters:
   # 全ての linter を無効化
   disable-all: true
