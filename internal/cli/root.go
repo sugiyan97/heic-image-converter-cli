@@ -15,10 +15,13 @@ import (
 )
 
 var (
+	// Version is overwritten at build time via ldflags (default: "v0.0.0")
+	Version     = "v0.0.0"
 	showEXIF    bool
 	removeEXIF  bool
 	checkEXIF   bool
 	uninstall   bool
+	showVersion bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -47,9 +50,16 @@ func init() {
 	rootCmd.Flags().BoolVar(&removeEXIF, "remove-exif", false, "EXIF情報を削除して変換します")
 	rootCmd.Flags().BoolVar(&checkEXIF, "check-exif", false, "JPEGファイルのEXIF情報の有無をチェックします")
 	rootCmd.Flags().BoolVar(&uninstall, "uninstall", false, "アンインストールを実行します")
+	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "バージョンを表示します")
 }
 
 func runConvert(_ *cobra.Command, args []string) error {
+	// バージョン表示モード
+	if showVersion {
+		fmt.Println(Version)
+		return nil
+	}
+
 	// アンインストールモード
 	if uninstall {
 		return runUninstall()

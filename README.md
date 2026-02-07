@@ -175,12 +175,24 @@ convert /path/to/directory
 
 | オプション | 説明 |
 |-----------|------|
+| `-v`, `--version` | バージョンを表示する |
 | `--show-exif` | EXIF情報を表示してから変換する |
 | `--remove-exif` | EXIF情報を削除して変換する（プライバシー保護） |
 | `--check-exif` | JPEGファイルのEXIF情報の有無をチェックする |
 | `--uninstall` | アンインストールを実行する |
 
 ### オプションの詳細
+
+#### `-v`, `--version` — バージョン表示
+
+```bash
+# バージョンを表示
+convert -v
+# または
+convert --version
+```
+
+リリースビルド時はタグ形式（例: `v1.0.0`）が表示される。ローカルビルド時は `v0.0.0` が表示される。
 
 #### `--show-exif` — EXIF情報の表示
 

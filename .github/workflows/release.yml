@@ -61,7 +61,7 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 1
         run: |
-          go build -ldflags "-s -w" -o bin/${{ matrix.binary_name }} ./cmd/convert
+          go build -ldflags "-s -w -X github.com/sugiyan97/heic-image-converter-cli/internal/cli.Version=${{ github.ref_name }}" -o bin/${{ matrix.binary_name }} ./cmd/convert
 
       - name: Build (Windows)
         if: matrix.os == 'windows-latest'
@@ -73,7 +73,7 @@ jobs:
           CGO_LDFLAGS: -LC:/tools/msys64/mingw64/lib
         run: |
           $env:PATH = "C:\tools\msys64\mingw64\bin;C:\tools\msys64\usr\bin;$env:PATH"
-          go build -ldflags "-s -w" -o bin/${{ matrix.binary_name }} ./cmd/convert
+          go build -ldflags "-s -w -X github.com/sugiyan97/heic-image-converter-cli/internal/cli.Version=${{ github.ref_name }}" -o bin/${{ matrix.binary_name }} ./cmd/convert
 
       - name: Create ZIP package (macOS)
         if: matrix.os == 'macos-latest'

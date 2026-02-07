@@ -88,6 +88,7 @@ func resetFlags() {
 	removeEXIF = false
 	checkEXIF = false
 	uninstall = false
+	showVersion = false
 }
 
 // TestRunConvertMode_TC00101 tests TC-001-01: Normal conversion of HEIC to JPEG
@@ -1277,6 +1278,153 @@ func TestRunConvertMode_TC01902(t *testing.T) {
 	// We need to test the actual command execution, not just runConvertMode
 	// For now, we'll document that this is tested by cobra itself
 	t.Skip("TC-019-02 is tested by cobra's flag validation")
+}
+
+// TestRunConvert_Version_TC02101 tests TC-021-01: -v option displays version
+func TestRunConvert_Version_TC02101(t *testing.T) {
+	resetFlags()
+	defer resetFlags()
+
+	showVersion = true
+	defer resetFlags()
+
+	// Capture stdout
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := runConvert(nil, []string{})
+
+	_ = w.Close()
+	os.Stdout = oldStdout
+
+	if err != nil {
+		t.Fatalf("runConvert failed: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Fatalf("Failed to read captured output: %v", err)
+	}
+	output := strings.TrimSpace(buf.String())
+	if output != Version {
+		t.Errorf("Expected version output %q, got: %q", Version, output)
+	}
+}
+
+// TestRunConvert_Version_TC02102 tests TC-021-02: --version option displays version
+func TestRunConvert_Version_TC02102(t *testing.T) {
+	resetFlags()
+	defer resetFlags()
+
+	showVersion = true
+	defer resetFlags()
+
+	// Capture stdout
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := runConvert(nil, []string{})
+
+	_ = w.Close()
+	os.Stdout = oldStdout
+
+	if err != nil {
+		t.Fatalf("runConvert failed: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Fatalf("Failed to read captured output: %v", err)
+	}
+	output := strings.TrimSpace(buf.String())
+	if output != Version {
+		t.Errorf("Expected version output %q, got: %q", Version, output)
+	}
+}
+
+// TestRunConvert_Version_TC02103 tests TC-021-03: Version display does not run conversion
+func TestRunConvert_Version_TC02103(t *testing.T) {
+	resetFlags()
+	defer resetFlags()
+
+	showVersion = true
+	defer resetFlags()
+
+	tmpDir, cleanup := setupTestEnvironment(t)
+	defer cleanup()
+
+	heicFile := filepath.Join(tmpDir, "test.HEIC")
+
+	// Capture stdout to suppress output
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := runConvert(nil, []string{heicFile})
+
+	_ = w.Close()
+	os.Stdout = oldStdout
+
+	if err != nil {
+		t.Fatalf("runConvert failed: %v", err)
+	}
+
+	// Consume captured output
+	var discard bytes.Buffer
+	_, _ = discard.ReadFrom(r)
+
+	// Verify no output file was created (conversion should not run)
+	outputPath := converter.GenerateOutputPath(heicFile)
+	if _, err := os.Stat(outputPath); err == nil {
+		t.Error("Output file should not be created when version flag is set")
+	}
+}
+
+// TestRunConvert_Version_TC02104 tests TC-021-04: Version takes precedence over other options
+func TestRunConvert_Version_TC02104(t *testing.T) {
+	resetFlags()
+	defer resetFlags()
+
+	showVersion = true
+	showEXIF = true
+	removeEXIF = true
+	defer resetFlags()
+
+	tmpDir, cleanup := setupTestEnvironment(t)
+	defer cleanup()
+
+	heicFile := filepath.Join(tmpDir, "test.HEIC")
+
+	// Capture stdout
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := runConvert(nil, []string{heicFile})
+
+	_ = w.Close()
+	os.Stdout = oldStdout
+
+	if err != nil {
+		t.Fatalf("runConvert failed: %v", err)
+	}
+
+	var buf bytes.Buffer
+	if _, err := buf.ReadFrom(r); err != nil {
+		t.Fatalf("Failed to read captured output: %v", err)
+	}
+	output := strings.TrimSpace(buf.String())
+	if output != Version {
+		t.Errorf("Expected version output %q, got: %q", Version, output)
+	}
+
+	// Verify no output file was created
+	outputPath := converter.GenerateOutputPath(heicFile)
+	if _, err := os.Stat(outputPath); err == nil {
+		t.Error("Output file should not be created when version flag is set")
+	}
 }
 
 // setupUninstallTestEnvironment creates a temporary install directory structure in the actual home directory for uninstall tests
