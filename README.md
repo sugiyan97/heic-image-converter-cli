@@ -12,6 +12,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルを他の画
 - [クイックスタート](#クイックスタート)
 - [インストール](#インストール)
 - [使用方法](#使用方法)
+  - [オプション一覧](#オプション一覧)
 - [トラブルシューティング](#トラブルシューティング)
 - [開発](#開発)
 - [ライセンス](#ライセンス)
@@ -170,9 +171,18 @@ convert input.HEIC
 convert /path/to/directory
 ```
 
-### オプション
+### オプション一覧
 
-#### EXIF情報の表示
+| オプション | 説明 |
+|-----------|------|
+| `--show-exif` | EXIF情報を表示してから変換する |
+| `--remove-exif` | EXIF情報を削除して変換する（プライバシー保護） |
+| `--check-exif` | JPEGファイルのEXIF情報の有無をチェックする |
+| `--uninstall` | アンインストールを実行する |
+
+### オプションの詳細
+
+#### `--show-exif` — EXIF情報の表示
 
 ```bash
 # EXIF情報を表示してから変換
@@ -182,7 +192,7 @@ convert --show-exif input.HEIC
 convert --show-exif /path/to/directory
 ```
 
-#### EXIF情報の削除
+#### `--remove-exif` — EXIF情報の削除
 
 ```bash
 # EXIF情報を削除して変換（プライバシー保護）
@@ -192,14 +202,14 @@ convert --remove-exif input.HEIC
 convert --remove-exif /path/to/directory
 ```
 
-#### EXIF情報の表示と削除を同時に実行
+#### `--show-exif` と `--remove-exif` の併用
 
 ```bash
 # EXIF情報を表示してから削除して変換
 convert --show-exif --remove-exif input.HEIC
 ```
 
-#### EXIF情報のチェック
+#### `--check-exif` — EXIF情報のチェック
 
 ```bash
 # カレントディレクトリの全JPEGファイルのEXIF情報をチェック
@@ -210,6 +220,13 @@ convert --check-exif input.jpg
 
 # 指定ディレクトリ内の全JPEGファイルのEXIF情報をチェック
 convert --check-exif /path/to/directory
+```
+
+#### `--uninstall` — アンインストール
+
+```bash
+# アンインストールを実行（HeicConverterフォルダ全体が削除されます）
+convert --uninstall
 ```
 
 ### 使用例
