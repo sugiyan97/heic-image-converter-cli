@@ -1,4 +1,4 @@
-.PHONY: build build-go build-windows build-macos build-all clean test lint help
+.PHONY: build build-go build-windows build-macos build-all build-release clean test lint help
 
 # Binary name
 BINARY_NAME=convert
@@ -19,6 +19,10 @@ GOMOD=$(GOCMD) mod
 LDFLAGS=-s -w
 CGO_ENABLED=1
 
+# Version for release build (same as github.ref_name in release workflow)
+# Use --abbrev=0 to get only tag (e.g. v0.0.4) without commit suffix
+VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+
 help: ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
@@ -29,6 +33,11 @@ build-go: ## Build for current platform
 	@echo "Building for current platform..."
 	@mkdir -p $(BIN_DIR)
 	$(GOBUILD) -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/$(BINARY_NAME) $(CMD_PATH)
+
+build-release: ## Build with release ldflags (same as CI, for local verification)
+	@echo "Building with release ldflags (Version=$(VERSION))..."
+	@mkdir -p $(BIN_DIR)
+	CGO_ENABLED=$(CGO_ENABLED) $(GOBUILD) -ldflags "-s -w -X github.com/sugiyan97/heic-image-converter-cli/internal/cli.Version=$(VERSION)" -o $(BIN_DIR)/$(BINARY_NAME) $(CMD_PATH)
 
 build-windows: ## Build for Windows (amd64)
 	@echo "Building for Windows (amd64)..."
