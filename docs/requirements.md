@@ -45,7 +45,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **優先度**: 最高
 - **説明**: コマンドライン引数で指定された単一のHEICファイルを変換する
 - **詳細**:
-  - コマンド形式: `convert input.HEIC`
+  - コマンド形式: `heic-convert input.HEIC`
   - ファイルパスは絶対パスまたは相対パスで指定可能
   - ファイルが存在しない場合はエラーメッセージを表示
 
@@ -54,7 +54,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **優先度**: 高
 - **説明**: 指定されたディレクトリ内の全HEICファイルを再帰的に検索して一括変換する
 - **詳細**:
-  - コマンド形式: `convert /path/to/directory`
+  - コマンド形式: `heic-convert /path/to/directory`
   - サブディレクトリも含めて検索
   - 変換結果のサマリーを表示（変換成功数、失敗数など）
 
@@ -63,7 +63,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **優先度**: 高
 - **説明**: 引数なしで実行した場合、カレントディレクトリ内の全HEICファイルを変換する
 - **詳細**:
-  - コマンド形式: `convert`
+  - コマンド形式: `heic-convert`
   - カレントディレクトリを再帰的に検索
   - 変換結果のサマリーを表示
 
@@ -81,7 +81,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **説明**: `--remove-exif`オプションでEXIF情報を削除して変換する
 - **詳細**:
   - プライバシー保護の用途に対応
-  - コマンド形式: `convert --remove-exif input.HEIC`
+  - コマンド形式: `heic-convert --remove-exif input.HEIC`
   - EXIF情報を完全に削除したJPEGファイルを生成
 
 #### REQ-007: EXIF情報の表示オプション
@@ -91,14 +91,14 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **詳細**:
   - 変換前にEXIF情報を標準出力に表示
   - 主要なEXIFタグ（撮影日時、カメラ情報、GPS情報など）を表示
-  - コマンド形式: `convert --show-exif input.HEIC`
+  - コマンド形式: `heic-convert --show-exif input.HEIC`
 
 #### REQ-008: EXIF情報のチェック機能
 
 - **優先度**: 中
 - **説明**: `--check-exif`オプションでJPEGファイルのEXIF情報の有無をチェックする
 - **詳細**:
-  - コマンド形式: `convert --check-exif [ファイル/ディレクトリ]`
+  - コマンド形式: `heic-convert --check-exif [ファイル/ディレクトリ]`
   - EXIF情報が残っている場合は警告を表示
   - チェック結果のサマリーを表示
   - 単一ファイル、ディレクトリ、カレントディレクトリに対応
@@ -130,7 +130,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **優先度**: 低
 - **説明**: JPEG品質をユーザーが指定できるオプション
 - **詳細**:
-  - コマンド形式: `convert --quality 85 input.HEIC`
+  - コマンド形式: `heic-convert --quality 85 input.HEIC`
   - デフォルトは95（高品質）
 
 #### REQ-012: 出力ディレクトリ指定
@@ -138,14 +138,14 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **優先度**: 低
 - **説明**: 出力先ディレクトリを指定できるオプション
 - **詳細**:
-  - コマンド形式: `convert --output-dir /path/to/output input.HEIC`
+  - コマンド形式: `heic-convert --output-dir /path/to/output input.HEIC`
 
 #### REQ-013: 元ファイル削除オプション
 
 - **優先度**: 低
 - **説明**: 変換成功後に元のHEICファイルを削除するオプション
 - **詳細**:
-  - コマンド形式: `convert --delete-original input.HEIC`
+  - コマンド形式: `heic-convert --delete-original input.HEIC`
   - デフォルトでは元ファイルを保持
 
 #### REQ-014: 並列処理
@@ -153,7 +153,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 - **優先度**: 低
 - **説明**: 複数ファイルの変換を並列処理して高速化
 - **詳細**:
-  - コマンド形式: `convert --parallel 4 /path/to/directory`
+  - コマンド形式: `heic-convert --parallel 4 /path/to/directory`
   - デデフォルトは順次処理
 
 ## 3. 非機能要件

@@ -58,9 +58,9 @@ foreach ($DllFile in $DllFiles) {
         $DllCount++
     }
 }
-$BinaryPath = Join-Path $InstallDir "convert.exe"
+$BinaryPath = Join-Path $InstallDir "heic-convert.exe"
 if (Test-Path $BinaryPath) {
-    Write-Info "バイナリファイル: convert.exe"
+    Write-Info "バイナリファイル: heic-convert.exe"
 }
 if ($DllCount -gt 0) {
     Write-Info "DLLファイル: $DllCount 個"

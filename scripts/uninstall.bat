@@ -31,8 +31,8 @@ set "DLL_COUNT=0"
 if exist "%INSTALL_DIR%\libgcc_s_seh-1.dll" set /a DLL_COUNT+=1
 if exist "%INSTALL_DIR%\libwinpthread-1.dll" set /a DLL_COUNT+=1
 if exist "%INSTALL_DIR%\libstdc++-6.dll" set /a DLL_COUNT+=1
-if exist "%INSTALL_DIR%\convert.exe" (
-    echo [INFO] バイナリファイル: convert.exe
+if exist "%INSTALL_DIR%\heic-convert.exe" (
+    echo [INFO] バイナリファイル: heic-convert.exe
 )
 if !DLL_COUNT! gtr 0 (
     echo [INFO] DLLファイル: !DLL_COUNT! 個

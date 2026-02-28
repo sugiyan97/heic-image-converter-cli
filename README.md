@@ -33,21 +33,21 @@ HEIC（High Efficiency Image Container）形式の画像ファイルを他の画
 
 ```bash
 # カレントディレクトリの全HEICファイルを変換
-convert
+heic-convert
 ```
 
 ### 単一ファイルの変換
 
 ```bash
 # ファイルを指定して変換
-convert photo.HEIC
+heic-convert photo.HEIC
 ```
 
 ### EXIF情報を削除して変換
 
 ```bash
 # プライバシー保護のためEXIF情報を削除
-convert --remove-exif photo.HEIC
+heic-convert --remove-exif photo.HEIC
 ```
 
 ## インストール
@@ -110,7 +110,7 @@ GitHub Releasesから各プラットフォーム用のZIPファイルをダウ�
 
 1. **バイナリから直接実行**（推奨）:
    ```bash
-   convert --uninstall
+   heic-convert --uninstall
    ```
 
 2. **アンインストールスクリプトを直接実行**:
@@ -162,13 +162,13 @@ make build-all
 
 ```bash
 # カレントディレクトリの全HEICファイルを変換
-convert
+heic-convert
 
 # 単一ファイルを変換
-convert input.HEIC
+heic-convert input.HEIC
 
 # 指定ディレクトリ内の全HEICファイルを変換
-convert /path/to/directory
+heic-convert /path/to/directory
 ```
 
 ### オプション一覧
@@ -187,9 +187,9 @@ convert /path/to/directory
 
 ```bash
 # バージョンを表示
-convert -v
+heic-convert -v
 # または
-convert --version
+heic-convert --version
 ```
 
 リリースビルド時はタグ形式（例: `v1.0.0`）が表示される。ローカルビルド時は `v0.0.0` が表示される。
@@ -198,47 +198,47 @@ convert --version
 
 ```bash
 # EXIF情報を表示してから変換
-convert --show-exif input.HEIC
+heic-convert --show-exif input.HEIC
 
 # ディレクトリ内の全ファイルのEXIF情報を表示
-convert --show-exif /path/to/directory
+heic-convert --show-exif /path/to/directory
 ```
 
 #### `--remove-exif` — EXIF情報の削除
 
 ```bash
 # EXIF情報を削除して変換（プライバシー保護）
-convert --remove-exif input.HEIC
+heic-convert --remove-exif input.HEIC
 
 # ディレクトリ内の全ファイルからEXIF情報を削除
-convert --remove-exif /path/to/directory
+heic-convert --remove-exif /path/to/directory
 ```
 
 #### `--show-exif` と `--remove-exif` の併用
 
 ```bash
 # EXIF情報を表示してから削除して変換
-convert --show-exif --remove-exif input.HEIC
+heic-convert --show-exif --remove-exif input.HEIC
 ```
 
 #### `--check-exif` — EXIF情報のチェック
 
 ```bash
 # カレントディレクトリの全JPEGファイルのEXIF情報をチェック
-convert --check-exif
+heic-convert --check-exif
 
 # 単一JPEGファイルのEXIF情報をチェック
-convert --check-exif input.jpg
+heic-convert --check-exif input.jpg
 
 # 指定ディレクトリ内の全JPEGファイルのEXIF情報をチェック
-convert --check-exif /path/to/directory
+heic-convert --check-exif /path/to/directory
 ```
 
 #### `--uninstall` — アンインストール
 
 ```bash
 # アンインストールを実行（HeicConverterフォルダ全体が削除されます）
-convert --uninstall
+heic-convert --uninstall
 ```
 
 ### 使用例
@@ -247,21 +247,21 @@ convert --uninstall
 
 ```bash
 # 写真フォルダ内の全HEICファイルをJPEGに変換
-convert ~/Pictures/iPhone
+heic-convert ~/Pictures/iPhone
 ```
 
 #### 例2: プライバシー保護のためEXIF情報を削除
 
 ```bash
 # SNSに投稿する前にEXIF情報を削除
-convert --remove-exif --show-exif ~/Pictures/iPhone
+heic-convert --remove-exif --show-exif ~/Pictures/iPhone
 ```
 
 #### 例3: 変換後のJPEGファイルのEXIF情報を確認
 
 ```bash
 # 変換後のJPEGファイルにEXIF情報が残っていないか確認
-convert --check-exif ~/Pictures/iPhone
+heic-convert --check-exif ~/Pictures/iPhone
 ```
 
 ## トラブルシューティング

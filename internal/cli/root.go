@@ -26,7 +26,7 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "convert [ファイル/ディレクトリ]",
+	Use:   "heic-convert [ファイル/ディレクトリ]",
 	Short: "HEIC画像をJPEG形式に変換する（現時点ではJPEG形式をサポート）",
 	Long: `HEIC Image Converterは、HEIC形式の画像ファイルを他の画像形式に変換するコマンドラインツールです。
 現時点ではJPEG形式への変換をサポートしています。

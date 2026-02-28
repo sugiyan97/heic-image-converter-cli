@@ -75,9 +75,9 @@ chmod +x install.sh
   powershell -ExecutionPolicy Bypass -File .\uninstall.ps1
   ```
 
-### インストール後、`convert`コマンドが見つからない
+### インストール後、`heic-convert`コマンドが見つからない
 
-**問題**: インストール後も`convert`コマンドが実行できない
+**問題**: インストール後も`heic-convert`コマンドが実行できない
 
 **解決方法**:
 - PATH設定を確認してください
@@ -85,6 +85,10 @@ chmod +x install.sh
 - 手動でPATHに追加する場合は、以下を実行：
   - macOS: `export PATH="$HOME/bin/HeicConverter:$PATH"`をシェル設定ファイルに追加
   - Windows: 環境変数の設定から`%USERPROFILE%\bin\HeicConverter`をPATHに追加
+
+**Windows の場合（`convert` と入力すると「無効なドライブ指定です」と表示される）**:
+- Windows にはシステムの `convert.exe`（FAT を NTFS に変換するコマンド）が標準で含まれており、PATH 上で先に検出されることがあります。
+- 本ツールではコマンド名を **`heic-convert`** にしています。`heic-convert --help` や `heic-convert input.HEIC` のように `heic-convert` を使ってください。
 
 ### Windows: DLLが見つからないエラー
 

@@ -31,8 +31,12 @@ if not exist "%INSTALL_DIR%" (
     mkdir "%INSTALL_DIR%"
 )
 
-REM 既存バイナリの確認
-set "BINARY_DEST=%INSTALL_DIR%\convert.exe"
+REM 既存バイナリの確認と旧 convert.exe の削除
+set "BINARY_DEST=%INSTALL_DIR%\heic-convert.exe"
+if exist "%INSTALL_DIR%\convert.exe" (
+    echo [WARN] 旧バイナリ convert.exe を削除します。
+    del /Q "%INSTALL_DIR%\convert.exe" 2>nul
+)
 if exist "%BINARY_DEST%" (
     echo [WARN] 既存のバイナリが見つかりました。上書きして更新します。
 )
@@ -78,7 +82,7 @@ if exist "%UNINSTALL_BAT_SOURCE%" (
 REM PATH設定の確認
 echo.
 echo [INFO] PATH設定について
-echo [INFO] インストール先 (%INSTALL_DIR%) をPATHに追加すると、どこからでも 'convert' コマンドを実行できます。
+echo [INFO] インストール先 %INSTALL_DIR% をPATHに追加すると、どこからでも 'heic-convert' コマンドを実行できます。
 
 REM 現在のユーザー環境変数のPATHを取得
 for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "CURRENT_PATH=%%b"
@@ -127,13 +131,13 @@ echo [INFO] インストールが完了しました！
 echo.
 echo [INFO] 使用方法:
 if "!PATH_ADDED!"=="1" (
-    echo   convert --help
+    echo   heic-convert --help
 ) else (
     echo   %BINARY_DEST% --help
 )
 echo.
 echo [INFO] アンインストール方法:
-echo   convert --uninstall
+echo   heic-convert --uninstall
 echo   または
 echo   %INSTALL_DIR%\%UNINSTALL_SCRIPT_BAT%
 

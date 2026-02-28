@@ -106,7 +106,7 @@ HEIC（High Efficiency Image Container）形式の画像ファイルをJPEG形�
 ### 3.1 基本コマンド
 
 ```bash
-convert [オプション] [ファイル/ディレクトリ]
+heic-convert [オプション] [ファイル/ディレクトリ]
 ```
 
 ### 3.2 オプション
@@ -123,35 +123,35 @@ convert [オプション] [ファイル/ディレクトリ]
 
 ```bash
 # カレントディレクトリの全HEICファイルを変換
-convert
+heic-convert
 
 # 単一ファイルを変換
-convert input.HEIC
+heic-convert input.HEIC
 
 # 指定ディレクトリ内の全HEICファイルを変換
-convert /path/to/directory
+heic-convert /path/to/directory
 
 # EXIF情報を表示して変換
-convert --show-exif input.HEIC
+heic-convert --show-exif input.HEIC
 
 # EXIF情報を削除して変換
-convert --remove-exif input.HEIC
+heic-convert --remove-exif input.HEIC
 
 # EXIF情報を表示してから削除して変換
-convert --show-exif --remove-exif input.HEIC
+heic-convert --show-exif --remove-exif input.HEIC
 ```
 
 #### 3.3.2 EXIFチェックコマンド
 
 ```bash
 # カレントディレクトリの全JPGファイルのEXIFをチェック
-convert --check-exif
+heic-convert --check-exif
 
 # 単一JPGファイルのEXIFをチェック
-convert --check-exif input.jpg
+heic-convert --check-exif input.jpg
 
 # 指定ディレクトリ内の全JPGファイルのEXIFをチェック
-convert --check-exif /path/to/directory
+heic-convert --check-exif /path/to/directory
 ```
 
 ## 4. 画像変換仕様

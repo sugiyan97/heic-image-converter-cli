@@ -41,8 +41,13 @@ if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 }
 
-# 既存バイナリの確認
-$BinaryDest = Join-Path $InstallDir "convert.exe"
+# 既存バイナリの確認と旧 convert.exe の削除
+$BinaryDest = Join-Path $InstallDir "heic-convert.exe"
+$OldBinaryDest = Join-Path $InstallDir "convert.exe"
+if (Test-Path $OldBinaryDest) {
+    Write-Warn "旧バイナリ convert.exe を削除します。"
+    Remove-Item -Path $OldBinaryDest -Force
+}
 if (Test-Path $BinaryDest) {
     Write-Warn "既存のバイナリが見つかりました。上書きして更新します。"
 }
@@ -85,7 +90,7 @@ if (Test-Path $UninstallBATSource) {
 # PATH設定の確認
 Write-Info ""
 Write-Info "PATH設定について"
-Write-Info "インストール先 ($InstallDir) をPATHに追加すると、どこからでも 'convert' コマンドを実行できます。"
+Write-Info "インストール先 $InstallDir をPATHに追加すると、どこからでも 'heic-convert' コマンドを実行できます。"
 
 # 現在のユーザー環境変数のPATHを取得
 $CurrentPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -117,13 +122,13 @@ Write-Info "インストールが完了しました！"
 Write-Info ""
 Write-Info "使用方法:"
 if ($CurrentPath -like "*$InstallDir*" -or ($Response -eq "" -or $Response -eq "Y" -or $Response -eq "y")) {
-    Write-Info "  convert --help"
+    Write-Info "  heic-convert --help"
 } else {
     Write-Info "  $BinaryDest --help"
 }
 Write-Info ""
 Write-Info "アンインストール方法:"
-Write-Info "  convert --uninstall"
+Write-Info "  heic-convert --uninstall"
 Write-Info "  または"
 Write-Info "  $InstallDir\$UninstallScriptPS1"
 

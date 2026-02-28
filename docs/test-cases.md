@@ -68,7 +68,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-001-01: 正常系 - HEICファイルをJPEGに変換
 
 - **前提条件**: 有効なHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力ファイル `test.jpg` が生成される
@@ -80,7 +80,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-001-02: 正常系 - 大文字拡張子のHEICファイルを変換
 
 - **前提条件**: 拡張子が大文字のHEICファイルが存在する
-- **入力**: `convert TEST.HEIC`
+- **入力**: `heic-convert TEST.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力ファイル `TEST.jpg` が生成される
@@ -89,7 +89,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-001-03: 正常系 - 小文字拡張子のheicファイルを変換
 
 - **前提条件**: 拡張子が小文字のheicファイルが存在する
-- **入力**: `convert test.heic`
+- **入力**: `heic-convert test.heic`
 - **期待結果**:
   - 変換が成功する
   - 出力ファイル `test.jpg` が生成される
@@ -98,7 +98,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-001-04: 正常系 - 混合拡張子のHeicファイルを変換
 
 - **前提条件**: 拡張子が混合のHeicファイルが存在する
-- **入力**: `convert test.Heic`
+- **入力**: `heic-convert test.Heic`
 - **期待結果**:
   - 変換が成功する
   - 出力ファイル `test.jpg` が生成される
@@ -109,7 +109,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-002-01: 正常系 - 絶対パスで指定したファイルを変換
 
 - **前提条件**: 有効なHEICファイルが存在する
-- **入力**: `convert /absolute/path/to/test.HEIC`
+- **入力**: `heic-convert /absolute/path/to/test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力ファイルが入力ファイルと同じディレクトリに生成される
@@ -118,7 +118,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-002-02: 正常系 - 相対パスで指定したファイルを変換
 
 - **前提条件**: 有効なHEICファイルが存在する
-- **入力**: `convert ./test.HEIC` または `convert ../test.HEIC`
+- **入力**: `heic-convert ./test.HEIC` または `heic-convert ../test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力ファイルが入力ファイルと同じディレクトリに生成される
@@ -127,7 +127,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-002-03: 異常系 - 存在しないファイルを指定
 
 - **前提条件**: 指定されたファイルが存在しない
-- **入力**: `convert nonexistent.HEIC`
+- **入力**: `heic-convert nonexistent.HEIC`
 - **期待結果**:
   - エラーメッセージが表示される: "エラー: ファイルまたはディレクトリが見つかりません: nonexistent.HEIC"
   - 終了コードが1である
@@ -136,7 +136,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-002-04: 異常系 - 無効なHEICファイルを指定
 
 - **前提条件**: HEIC形式ではないファイル（例: テキストファイル）が存在する
-- **入力**: `convert invalid.txt`
+- **入力**: `heic-convert invalid.txt`
 - **期待結果**:
   - エラーメッセージが表示される
   - 変換が失敗する
@@ -145,7 +145,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-002-05: 異常系 - 破損したHEICファイルを指定
 
 - **前提条件**: 破損したHEICファイルが存在する
-- **入力**: `convert corrupted.HEIC`
+- **入力**: `heic-convert corrupted.HEIC`
 - **期待結果**:
   - エラーメッセージが表示される: "✗ 変換失敗: corrupted.HEIC"
   - 変換が失敗する
@@ -156,7 +156,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-003-01: 正常系 - ディレクトリ内の全HEICファイルを変換
 
 - **前提条件**: 指定ディレクトリ内に複数のHEICファイルが存在する
-- **入力**: `convert /path/to/directory`
+- **入力**: `heic-convert /path/to/directory`
 - **期待結果**:
   - ディレクトリ内の全HEICファイルが変換される
   - 変換結果のサマリーが表示される: "合計 N 個のファイルを変換しました。"
@@ -166,7 +166,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-003-02: 正常系 - サブディレクトリを含む再帰的変換
 
 - **前提条件**: 指定ディレクトリとサブディレクトリ内にHEICファイルが存在する
-- **入力**: `convert /path/to/directory`
+- **入力**: `heic-convert /path/to/directory`
 - **期待結果**:
   - サブディレクトリ内のHEICファイルも変換される
   - 全ファイルの変換結果のサマリーが表示される
@@ -175,7 +175,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-003-03: 正常系 - 空のディレクトリを指定
 
 - **前提条件**: HEICファイルが存在しないディレクトリを指定
-- **入力**: `convert /path/to/empty/directory`
+- **入力**: `heic-convert /path/to/empty/directory`
 - **期待結果**:
   - メッセージが表示される: "HEICファイルが見つかりませんでした。"
   - 正常終了する（終了コード0）
@@ -184,7 +184,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-003-04: 異常系 - 存在しないディレクトリを指定
 
 - **前提条件**: 指定されたディレクトリが存在しない
-- **入力**: `convert /nonexistent/directory`
+- **入力**: `heic-convert /nonexistent/directory`
 - **期待結果**:
   - エラーメッセージが表示される: "エラー: ファイルまたはディレクトリが見つかりません: /nonexistent/directory"
   - 終了コードが1である
@@ -193,7 +193,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-003-05: 正常系 - 一部のファイルが変換失敗しても継続
 
 - **前提条件**: ディレクトリ内に有効なHEICファイルと破損したHEICファイルが混在
-- **入力**: `convert /path/to/directory`
+- **入力**: `heic-convert /path/to/directory`
 - **期待結果**:
   - 有効なファイルは変換される
   - 破損したファイルはエラーメッセージを表示してスキップされる
@@ -205,7 +205,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-004-01: 正常系 - 引数なしで実行（HEICファイルあり）
 
 - **前提条件**: カレントディレクトリにHEICファイルが存在する
-- **入力**: `convert`
+- **入力**: `heic-convert`
 - **期待結果**:
   - カレントディレクトリ内の全HEICファイルが変換される
   - 変換結果のサマリーが表示される
@@ -214,7 +214,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-004-02: 正常系 - 引数なしで実行（HEICファイルなし）
 
 - **前提条件**: カレントディレクトリにHEICファイルが存在しない
-- **入力**: `convert`
+- **入力**: `heic-convert`
 - **期待結果**:
   - メッセージが表示される: "HEICファイルが見つかりませんでした。"
   - 正常終了する（終了コード0）
@@ -223,7 +223,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-004-03: 正常系 - サブディレクトリも含めて検索
 
 - **前提条件**: カレントディレクトリとサブディレクトリにHEICファイルが存在する
-- **入力**: `convert`
+- **入力**: `heic-convert`
 - **期待結果**:
   - サブディレクトリ内のHEICファイルも変換される
   - 全ファイルの変換結果のサマリーが表示される
@@ -234,7 +234,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-005-01: 正常系 - EXIF情報ありのHEICファイルを変換（デフォルト）
 
 - **前提条件**: EXIF情報を含むHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力JPEGファイルにEXIF情報が保持されている
@@ -244,7 +244,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-005-02: 正常系 - EXIF情報なしのHEICファイルを変換（デフォルト）
 
 - **前提条件**: EXIF情報を含まないHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力JPEGファイルが生成される（EXIFなし）
@@ -253,7 +253,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-005-03: 正常系 - GPS情報を含むEXIF情報を保持
 
 - **前提条件**: GPS情報を含むEXIF情報を持つHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力JPEGファイルにGPS情報が保持されている
@@ -264,7 +264,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-006-01: 正常系 - --remove-exifオプションでEXIF情報を削除
 
 - **前提条件**: EXIF情報を含むHEICファイルが存在する
-- **入力**: `convert --remove-exif test.HEIC`
+- **入力**: `heic-convert --remove-exif test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力JPEGファイルにEXIF情報が含まれていない
@@ -274,7 +274,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-006-02: 正常系 - --remove-exifオプションでディレクトリ内の全ファイルを変換
 
 - **前提条件**: EXIF情報を含むHEICファイルが複数存在するディレクトリ
-- **入力**: `convert --remove-exif /path/to/directory`
+- **入力**: `heic-convert --remove-exif /path/to/directory`
 - **期待結果**:
   - 全ファイルが変換される
   - 全出力JPEGファイルにEXIF情報が含まれていない
@@ -283,7 +283,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-006-03: 正常系 - --remove-exifオプションでカレントディレクトリを変換
 
 - **前提条件**: カレントディレクトリにEXIF情報を含むHEICファイルが存在する
-- **入力**: `convert --remove-exif`
+- **入力**: `heic-convert --remove-exif`
 - **期待結果**:
   - 全ファイルが変換される
   - 全出力JPEGファイルにEXIF情報が含まれていない
@@ -294,7 +294,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-007-01: 正常系 - --show-exifオプションでEXIF情報を表示
 
 - **前提条件**: EXIF情報を含むHEICファイルが存在する
-- **入力**: `convert --show-exif test.HEIC`
+- **入力**: `heic-convert --show-exif test.HEIC`
 - **期待結果**:
   - EXIF情報が標準出力に表示される
   - 主要なEXIFタグ（撮影日時、カメラ情報、GPS情報など）が表示される
@@ -304,7 +304,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-007-02: 正常系 - --show-exifオプションでEXIF情報なしのファイルを処理
 
 - **前提条件**: EXIF情報を含まないHEICファイルが存在する
-- **入力**: `convert --show-exif test.HEIC`
+- **入力**: `heic-convert --show-exif test.HEIC`
 - **期待結果**:
   - "EXIF情報: なし" と表示される
   - 変換も正常に完了する
@@ -313,7 +313,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-007-03: 正常系 - --show-exifオプションでディレクトリ内の全ファイルを処理
 
 - **前提条件**: EXIF情報を含むHEICファイルが複数存在するディレクトリ
-- **入力**: `convert --show-exif /path/to/directory`
+- **入力**: `heic-convert --show-exif /path/to/directory`
 - **期待結果**:
   - 各ファイルのEXIF情報が表示される
   - 全ファイルが変換される
@@ -322,7 +322,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-007-04: 正常系 - --show-exifと--remove-exifを同時に指定
 
 - **前提条件**: EXIF情報を含むHEICファイルが存在する
-- **入力**: `convert --show-exif --remove-exif test.HEIC`
+- **入力**: `heic-convert --show-exif --remove-exif test.HEIC`
 - **期待結果**:
   - EXIF情報が表示される
   - 変換後のJPEGファイルにはEXIF情報が含まれていない
@@ -333,7 +333,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-008-01: 正常系 - --check-exifオプションで単一JPEGファイルをチェック（EXIFあり）
 
 - **前提条件**: EXIF情報を含むJPEGファイルが存在する
-- **入力**: `convert --check-exif test.jpg`
+- **入力**: `heic-convert --check-exif test.jpg`
 - **期待結果**:
   - "✗ test.jpg: EXIF情報が残っています" と表示される
   - 検出されたEXIFタグが表示される
@@ -343,7 +343,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-008-02: 正常系 - --check-exifオプションで単一JPEGファイルをチェック（EXIFなし）
 
 - **前提条件**: EXIF情報を含まないJPEGファイルが存在する
-- **入力**: `convert --check-exif test.jpg`
+- **入力**: `heic-convert --check-exif test.jpg`
 - **期待結果**:
   - "✓ test.jpg: EXIF情報は削除されています" と表示される
   - 終了コードが0である
@@ -352,7 +352,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-008-03: 正常系 - --check-exifオプションでディレクトリ内の全JPEGファイルをチェック
 
 - **前提条件**: EXIF情報あり/なしのJPEGファイルが混在するディレクトリ
-- **入力**: `convert --check-exif /path/to/directory`
+- **入力**: `heic-convert --check-exif /path/to/directory`
 - **期待結果**:
   - 各ファイルのチェック結果が表示される
   - サマリーが表示される:
@@ -365,7 +365,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-008-04: 正常系 - --check-exifオプションでカレントディレクトリをチェック
 
 - **前提条件**: カレントディレクトリにJPEGファイルが存在する
-- **入力**: `convert --check-exif`
+- **入力**: `heic-convert --check-exif`
 - **期待結果**:
   - カレントディレクトリ内の全JPEGファイルがチェックされる
   - サマリーが表示される
@@ -374,7 +374,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-008-05: 正常系 - --check-exifオプションで空のディレクトリをチェック
 
 - **前提条件**: JPEGファイルが存在しないディレクトリ
-- **入力**: `convert --check-exif /path/to/empty/directory`
+- **入力**: `heic-convert --check-exif /path/to/empty/directory`
 - **期待結果**:
   - "JPGファイルが見つかりませんでした。" と表示される
   - 正常終了する（終了コード0）
@@ -383,7 +383,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-008-06: 異常系 - --check-exifオプションで存在しないファイルを指定
 
 - **前提条件**: 指定されたファイルが存在しない
-- **入力**: `convert --check-exif nonexistent.jpg`
+- **入力**: `heic-convert --check-exif nonexistent.jpg`
 - **期待結果**:
   - 警告メッセージが表示される: "警告: ファイルまたはディレクトリが見つかりません: nonexistent.jpg"
   - 処理が継続される
@@ -394,7 +394,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-009-01: 異常系 - ファイルが見つからない場合のエラーメッセージ
 
 - **前提条件**: 指定されたファイルが存在しない
-- **入力**: `convert nonexistent.HEIC`
+- **入力**: `heic-convert nonexistent.HEIC`
 - **期待結果**:
   - エラーメッセージが表示される: "エラー: ファイルまたはディレクトリが見つかりません: nonexistent.HEIC"
   - エラーメッセージは日本語で表示される
@@ -404,7 +404,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-009-02: 異常系 - HEICファイルのデコード失敗時のエラーメッセージ
 
 - **前提条件**: 破損したHEICファイルが存在する
-- **入力**: `convert corrupted.HEIC`
+- **入力**: `heic-convert corrupted.HEIC`
 - **期待結果**:
   - エラーメッセージが表示される: "✗ 変換失敗: corrupted.HEIC"
   - エラーの詳細が表示される
@@ -414,7 +414,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-009-03: 異常系 - JPEGファイルのエンコード失敗時のエラーメッセージ
 
 - **前提条件**: 書き込み権限のないディレクトリに出力しようとする
-- **入力**: `convert test.HEIC`（出力先が書き込み不可）
+- **入力**: `heic-convert test.HEIC`（出力先が書き込み不可）
 - **期待結果**:
   - エラーメッセージが表示される: "✗ 変換失敗: test.HEIC"
   - エラーの詳細が表示される
@@ -423,7 +423,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-009-04: 正常系 - EXIF情報の処理失敗時の警告メッセージ
 
 - **前提条件**: EXIF情報の処理に失敗しても変換は継続できるHEICファイル
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 警告メッセージが表示される（EXIF処理失敗時）
   - 変換は正常に完了する（EXIFなしでJPEGを生成）
@@ -432,7 +432,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-009-05: 正常系 - 複数ファイル処理時に一部エラーが発生しても継続
 
 - **前提条件**: 有効なHEICファイルと破損したHEICファイルが混在するディレクトリ
-- **入力**: `convert /path/to/directory`
+- **入力**: `heic-convert /path/to/directory`
 - **期待結果**:
   - 有効なファイルは変換される
   - 破損したファイルはエラーメッセージを表示してスキップされる
@@ -444,7 +444,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-010-01: 正常系 - RGBA色空間のHEICファイルを変換
 
 - **前提条件**: RGBA色空間のHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力JPEGファイルが正しく生成される
@@ -454,7 +454,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-010-02: 正常系 - NRGBA色空間のHEICファイルを変換
 
 - **前提条件**: NRGBA色空間のHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力JPEGファイルが正しく生成される
@@ -464,7 +464,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-010-03: 正常系 - YCbCr色空間のHEICファイルを変換
 
 - **前提条件**: YCbCr色空間のHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - 出力JPEGファイルが正しく生成される
@@ -474,7 +474,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-010-04: 正常系 - アルファチャンネルがあるHEICファイルを変換
 
 - **前提条件**: アルファチャンネル（透明度）を含むHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
   - アルファチャンネルが白背景に合成される
@@ -486,7 +486,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-019-01: 正常系 - 不正な引数で実行
 
 - **前提条件**: なし
-- **入力**: `convert file1.HEIC file2.HEIC`
+- **入力**: `heic-convert file1.HEIC file2.HEIC`
 - **期待結果**:
   - 使用方法が表示される
   - 終了コードが1である
@@ -495,7 +495,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-019-02: 正常系 - 不明なオプションで実行
 
 - **前提条件**: なし
-- **入力**: `convert --unknown-option test.HEIC`
+- **入力**: `heic-convert --unknown-option test.HEIC`
 - **期待結果**:
   - エラーメッセージが表示される（flagパッケージのデフォルト動作）
 - **優先度**: 中
@@ -505,7 +505,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-021-01: 正常系 - -v オプションでバージョン表示
 
 - **前提条件**: なし
-- **入力**: `convert -v`
+- **入力**: `heic-convert -v`
 - **期待結果**:
   - バージョン文字列が標準出力に表示される
   - リリースビルド時はタグ形式（例: `v1.0.0`）が表示される
@@ -516,7 +516,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-021-02: 正常系 - --version オプションでバージョン表示
 
 - **前提条件**: なし
-- **入力**: `convert --version`
+- **入力**: `heic-convert --version`
 - **期待結果**:
   - バージョン文字列が標準出力に表示される
   - `-v` オプションと同様の出力となる
@@ -526,7 +526,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-021-03: 正常系 - バージョン表示時は他処理を実行しない
 
 - **前提条件**: なし
-- **入力**: `convert -v` または `convert --version`
+- **入力**: `heic-convert -v` または `heic-convert --version`
 - **期待結果**:
   - バージョン表示のみ行われ、変換処理は実行されない
   - 引数（ファイルパス等）が指定されていても無視される
@@ -535,7 +535,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-021-04: 正常系 - バージョン表示は他オプションより優先される
 
 - **前提条件**: なし
-- **入力**: `convert -v --show-exif test.HEIC` または `convert --version --remove-exif`
+- **入力**: `heic-convert -v --show-exif test.HEIC` または `heic-convert --version --remove-exif`
 - **期待結果**:
   - バージョン表示のみ行われ、変換・EXIF処理は実行されない
 - **優先度**: 低
@@ -545,7 +545,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-015-01: 正常系 - 一般的なサイズのHEICファイルの変換速度
 
 - **前提条件**: 数MB程度のHEICファイルが存在する
-- **入力**: `convert test.HEIC`
+- **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が数秒以内に完了する
   - 実用的な速度を維持している
@@ -554,7 +554,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-015-02: 正常系 - 複数ファイルの一括変換速度
 
 - **前提条件**: 10個程度のHEICファイルが存在するディレクトリ
-- **入力**: `convert /path/to/directory`
+- **入力**: `heic-convert /path/to/directory`
 - **期待結果**:
   - 全ファイルの変換が合理的な時間内に完了する
 - **優先度**: 低
@@ -564,7 +564,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 #### TC-016-01: 正常系 - 大きなHEICファイルの変換時のメモリ使用
 
 - **前提条件**: 大きなHEICファイル（数十MB程度）が存在する
-- **入力**: `convert large.HEIC`
+- **入力**: `heic-convert large.HEIC`
 - **期待結果**:
   - 変換が正常に完了する
   - メモリリークが発生しない
