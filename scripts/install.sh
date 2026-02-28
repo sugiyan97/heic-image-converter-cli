@@ -48,22 +48,26 @@ if [ ! -d "$INSTALL_DIR" ]; then
     mkdir -p "$INSTALL_DIR"
 fi
 
-# 既存バイナリの確認
+# 既存バイナリの確認と旧 convert の削除
 if [ -f "$INSTALL_DIR/convert" ]; then
+    warn "旧バイナリ (convert) を削除します。"
+    rm -f "$INSTALL_DIR/convert"
+fi
+if [ -f "$INSTALL_DIR/heic-convert" ]; then
     warn "既存のバイナリが見つかりました。上書きして更新します。"
 fi
 
 # バイナリのコピー
 info "バイナリをコピーしています..."
-cp "$BINARY_PATH" "$INSTALL_DIR/convert"
+cp "$BINARY_PATH" "$INSTALL_DIR/heic-convert"
 
 # 実行権限の付与
 info "実行権限を設定しています..."
-chmod +x "$INSTALL_DIR/convert"
+chmod +x "$INSTALL_DIR/heic-convert"
 
 # macOSのquarantine属性を削除
 info "quarantine属性を削除しています..."
-xattr -d com.apple.quarantine "$INSTALL_DIR/convert" 2>/dev/null || true
+xattr -d com.apple.quarantine "$INSTALL_DIR/heic-convert" 2>/dev/null || true
 
 # アンインストールスクリプトのコピー
 if [ -f "$SCRIPT_DIR/$UNINSTALL_SCRIPT" ]; then
@@ -77,7 +81,7 @@ fi
 # PATH設定の確認
 info ""
 info "PATH設定について"
-info "インストール先 ($INSTALL_DIR) をPATHに追加すると、どこからでも 'convert' コマンドを実行できます。"
+info "インストール先 ($INSTALL_DIR) をPATHに追加すると、どこからでも 'heic-convert' コマンドを実行できます。"
 
 # シェルの検出
 SHELL_CONFIG=""
@@ -127,13 +131,13 @@ info "インストールが完了しました！"
 info ""
 info "使用方法:"
 if grep -q "$INSTALL_DIR" "${SHELL_CONFIG:-$HOME/.zshrc}" 2>/dev/null || grep -q "$INSTALL_DIR" "${SHELL_CONFIG:-$HOME/.bash_profile}" 2>/dev/null; then
-    info "  convert --help"
+    info "  heic-convert --help"
 else
-    info "  $INSTALL_DIR/convert --help"
+    info "  $INSTALL_DIR/heic-convert --help"
 fi
 info ""
 info "アンインストール方法:"
-info "  convert --uninstall"
+info "  heic-convert --uninstall"
 info "  または"
 info "  $INSTALL_DIR/$UNINSTALL_SCRIPT"
 
