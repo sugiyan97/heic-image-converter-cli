@@ -34,7 +34,7 @@ if not exist "%INSTALL_DIR%" (
 REM 既存バイナリの確認と旧 convert.exe の削除
 set "BINARY_DEST=%INSTALL_DIR%\heic-convert.exe"
 if exist "%INSTALL_DIR%\convert.exe" (
-    echo [WARN] 旧バイナリ (convert.exe) を削除します。
+    echo [WARN] 旧バイナリ convert.exe を削除します。
     del /Q "%INSTALL_DIR%\convert.exe" 2>nul
 )
 if exist "%BINARY_DEST%" (
@@ -82,7 +82,7 @@ if exist "%UNINSTALL_BAT_SOURCE%" (
 REM PATH設定の確認
 echo.
 echo [INFO] PATH設定について
-echo [INFO] インストール先 (%INSTALL_DIR%) をPATHに追加すると、どこからでも 'heic-convert' コマンドを実行できます。
+echo [INFO] インストール先 %INSTALL_DIR% をPATHに追加すると、どこからでも 'heic-convert' コマンドを実行できます。
 
 REM 現在のユーザー環境変数のPATHを取得
 for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "CURRENT_PATH=%%b"

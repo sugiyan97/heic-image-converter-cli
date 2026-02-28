@@ -45,7 +45,7 @@ if (-not (Test-Path $InstallDir)) {
 $BinaryDest = Join-Path $InstallDir "heic-convert.exe"
 $OldBinaryDest = Join-Path $InstallDir "convert.exe"
 if (Test-Path $OldBinaryDest) {
-    Write-Warn "旧バイナリ (convert.exe) を削除します。"
+    Write-Warn "旧バイナリ convert.exe を削除します。"
     Remove-Item -Path $OldBinaryDest -Force
 }
 if (Test-Path $BinaryDest) {
@@ -90,7 +90,7 @@ if (Test-Path $UninstallBATSource) {
 # PATH設定の確認
 Write-Info ""
 Write-Info "PATH設定について"
-Write-Info "インストール先 ($InstallDir) をPATHに追加すると、どこからでも 'heic-convert' コマンドを実行できます。"
+Write-Info "インストール先 $InstallDir をPATHに追加すると、どこからでも 'heic-convert' コマンドを実行できます。"
 
 # 現在のユーザー環境変数のPATHを取得
 $CurrentPath = [Environment]::GetEnvironmentVariable("Path", "User")
