@@ -93,7 +93,6 @@ func resetFlags() {
 
 // TestRunConvertMode_TC00101 tests TC-001-01: Normal conversion of HEIC to JPEG
 func TestRunConvertMode_TC00101(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -117,7 +116,6 @@ func TestRunConvertMode_TC00101(t *testing.T) {
 
 // TestRunConvertMode_TC00201 tests TC-002-01: Absolute path conversion
 func TestRunConvertMode_TC00201(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -181,7 +179,6 @@ func TestRunConvertMode_TC00202(t *testing.T) {
 
 // TestRunConvertMode_TC00203 tests TC-002-03: Nonexistent file error
 func TestRunConvertMode_TC00203(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -201,7 +198,6 @@ func TestRunConvertMode_TC00203(t *testing.T) {
 
 // TestRunConvertMode_TC00204 tests TC-002-04: Invalid file error
 func TestRunConvertMode_TC00204(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -228,7 +224,6 @@ func TestRunConvertMode_TC00204(t *testing.T) {
 
 // TestRunConvertMode_TC00301 tests TC-003-01: Directory batch conversion
 func TestRunConvertMode_TC00301(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -257,7 +252,6 @@ func TestRunConvertMode_TC00301(t *testing.T) {
 
 // TestRunConvertMode_TC00302 tests TC-003-02: Recursive directory conversion
 func TestRunConvertMode_TC00302(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -280,7 +274,6 @@ func TestRunConvertMode_TC00302(t *testing.T) {
 
 // TestRunConvertMode_TC00303 tests TC-003-03: Empty directory
 func TestRunConvertMode_TC00303(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -302,7 +295,6 @@ func TestRunConvertMode_TC00303(t *testing.T) {
 
 // TestRunConvertMode_TC00304 tests TC-003-04: Nonexistent directory error
 func TestRunConvertMode_TC00304(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -388,7 +380,6 @@ func TestRunConvertMode_TC00402(t *testing.T) {
 
 // TestRunConvertMode_TC00601 tests TC-006-01: Remove EXIF option
 func TestRunConvertMode_TC00601(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -425,7 +416,6 @@ func TestRunConvertMode_TC00601(t *testing.T) {
 
 // TestRunConvertMode_TC00602 tests TC-006-02: Remove EXIF for directory
 func TestRunConvertMode_TC00602(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -462,7 +452,6 @@ func TestRunConvertMode_TC00602(t *testing.T) {
 
 // TestRunCheckEXIF_TC00801 tests TC-008-01, TC-008-02: Check EXIF for single file
 func TestRunCheckEXIF_TC00801(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -492,7 +481,6 @@ func TestRunCheckEXIF_TC00801(t *testing.T) {
 
 // TestRunCheckEXIF_TC00803 tests TC-008-03: Check EXIF for directory
 func TestRunCheckEXIF_TC00803(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -568,7 +556,6 @@ func TestRunCheckEXIF_TC00804(t *testing.T) {
 
 // TestRunCheckEXIF_TC00805 tests TC-008-05: Check EXIF for empty directory
 func TestRunCheckEXIF_TC00805(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -593,7 +580,6 @@ func TestRunCheckEXIF_TC00805(t *testing.T) {
 
 // TestRunCheckEXIF_TC00806 tests TC-008-06: Check EXIF for nonexistent file
 func TestRunCheckEXIF_TC00806(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -611,7 +597,6 @@ func TestRunCheckEXIF_TC00806(t *testing.T) {
 
 // TestRunCheckEXIF_InvalidFile tests check EXIF with invalid file type
 func TestRunCheckEXIF_InvalidFile(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -642,7 +627,6 @@ func TestRunCheckEXIF_InvalidFile(t *testing.T) {
 
 // TestRunConvertMode_ShowEXIF tests TC-007-01: Show EXIF option
 func TestRunConvertMode_ShowEXIF(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -689,7 +673,6 @@ func TestRunConvertMode_ShowEXIF(t *testing.T) {
 
 // TestRunConvertMode_ShowEXIFAndRemoveEXIF tests TC-007-04: Show and remove EXIF together
 func TestRunConvertMode_ShowEXIFAndRemoveEXIF(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -727,7 +710,6 @@ func TestRunConvertMode_ShowEXIFAndRemoveEXIF(t *testing.T) {
 
 // TestRunConvertMode_TC00305 tests TC-003-05: Continue on partial failure
 func TestRunConvertMode_TC00305(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -765,7 +747,6 @@ func TestRunConvertMode_TC00305(t *testing.T) {
 
 // TestRunConvertMode_TC00905 tests TC-009-05: Continue on partial failure in directory
 func TestRunConvertMode_TC00905(t *testing.T) {
-	t.Parallel()
 	resetFlags()
 	defer resetFlags()
 
@@ -931,13 +912,27 @@ func TestRunConvertMode_TC00501(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	// Note: EXIF preservation depends on HEIC file having EXIF
-	// This test verifies conversion works, EXIF check is done separately
-	hasEXIF, _, err := exif.CheckEXIFInJPEG(outputPath)
+	// sample/test.HEIC carries EXIF data, so it must survive the conversion.
+	hasEXIF, tagNames, err := exif.CheckEXIFInJPEG(outputPath)
 	if err != nil {
-		t.Logf("Failed to check EXIF (may not have EXIF in source): %v", err)
+		t.Fatalf("Failed to check EXIF: %v", err)
 	}
-	_ = hasEXIF // EXIF may or may not be present depending on source file
+	if !hasEXIF {
+		t.Errorf("Expected EXIF to be preserved in %s, but none was found", outputPath)
+	}
+	if !containsTag(tagNames, "Make") {
+		t.Errorf("Expected Make tag to be preserved, got tags: %v", tagNames)
+	}
+}
+
+// containsTag reports whether tagNames contains the given tag.
+func containsTag(tagNames []string, tag string) bool {
+	for _, name := range tagNames {
+		if name == tag {
+			return true
+		}
+	}
+	return false
 }
 
 // TestRunConvertMode_TC00502 tests TC-005-02: EXIF preservation (default, without EXIF)
@@ -988,8 +983,14 @@ func TestRunConvertMode_TC00503(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	// Note: GPS information check requires source file with GPS data
-	// This test verifies conversion works, GPS check would require specific test data
+	// sample/test.HEIC carries GPS data, so it must survive the conversion.
+	_, tagNames, err := exif.CheckEXIFInJPEG(outputPath)
+	if err != nil {
+		t.Fatalf("Failed to check EXIF: %v", err)
+	}
+	if !containsTag(tagNames, "GPSLatitude") {
+		t.Errorf("Expected GPSLatitude tag to be preserved, got tags: %v", tagNames)
+	}
 }
 
 // TestRunConvertMode_TC00603 tests TC-006-03: Remove EXIF for current directory

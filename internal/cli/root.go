@@ -264,13 +264,12 @@ func runConvertMode(args []string) error {
 			if err := exif.RemoveEXIFFromJPEG(outputPath); err != nil {
 				fmt.Printf("警告: %s のEXIF情報の削除に失敗しました: %v\n", outputPath, err)
 			}
+		} else {
+			// EXIF情報を保持（HEICからJPEGへコピー）
+			if err := exif.CopyEXIFFromHEICToJPEG(heicPath, outputPath); err != nil {
+				fmt.Printf("警告: %s のEXIF情報の保持に失敗しました: %v\n", outputPath, err)
+			}
 		}
-		// EXIF情報を保持（HEICからJPEGへコピー）
-		// 現時点では、goheifがEXIF抽出を直接サポートしていないため、
-		// この機能は将来的に実装予定
-		// if err := exif.CopyEXIFFromHEICToJPEG(heicPath, outputPath); err != nil {
-		// 	fmt.Printf("警告: %s のEXIF情報の保持に失敗しました: %v\n", outputPath, err)
-		// }
 
 		fmt.Printf("✓ 変換完了: %s -> %s\n", heicPath, outputPath)
 		successCount++

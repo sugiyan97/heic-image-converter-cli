@@ -11,6 +11,7 @@ import (
 
 	"github.com/adrium/goheif"
 	exifv3 "github.com/dsoprea/go-exif/v3"
+	exifcommon "github.com/dsoprea/go-exif/v3/common"
 	jpegstructure "github.com/dsoprea/go-jpeg-image-structure/v2"
 )
 
@@ -42,7 +43,6 @@ func ExtractEXIFFromHEIC(heicPath string) ([]byte, error) {
 }
 
 // EmbedEXIFToJPEG embeds EXIF data into a JPEG file
-// Note: This is a placeholder implementation. Full EXIF embedding requires IfdBuilder.
 func EmbedEXIFToJPEG(jpegPath string, exifData []byte) error {
 	if len(exifData) == 0 {
 		// No EXIF data to embed
@@ -64,15 +64,35 @@ func EmbedEXIFToJPEG(jpegPath string, exifData []byte) error {
 
 	sl := intfc.(*jpegstructure.SegmentList)
 
-	// Remove existing EXIF segment if present
-	_, err = sl.DropExif()
+	// goheif returns the EXIF blob with its "Exif\0\0" marker still attached;
+	// strip it down to the raw TIFF structure that go-exif expects.
+	rawExif, err := exifv3.SearchAndExtractExif(exifData)
 	if err != nil {
-		return fmt.Errorf("EXIFセグメントの削除に失敗しました: %w", err)
+		return fmt.Errorf("EXIFデータの解析に失敗しました: %w", err)
 	}
 
-	// TODO: SetExif requires *exif.IfdBuilder, not []byte
-	// For now, we'll skip EXIF embedding and return a warning
-	// This will be implemented when we have proper EXIF extraction from HEIC
+	// Parse the raw EXIF bytes extracted from the HEIC file into an IFD chain,
+	// then rebuild it as an IfdBuilder so it can be written into the JPEG.
+	im, err := exifcommon.NewIfdMappingWithStandard()
+	if err != nil {
+		return fmt.Errorf("IFDマッピングの初期化に失敗しました: %w", err)
+	}
+	ti := exifv3.NewTagIndex()
+
+	_, index, err := exifv3.Collect(im, ti, rawExif)
+	if err != nil {
+		return fmt.Errorf("EXIFデータの解析に失敗しました: %w", err)
+	}
+
+	ib, err := buildIfdChain(im, ti, index.RootIfd)
+	if err != nil {
+		return fmt.Errorf("EXIF情報の再構築に失敗しました: %w", err)
+	}
+
+	// Embed the EXIF data (replaces any existing EXIF segment)
+	if err := sl.SetExif(ib); err != nil {
+		return fmt.Errorf("EXIF情報の埋め込みに失敗しました: %w", err)
+	}
 
 	// Write the modified JPEG
 	outFile, err := os.Create(jpegPath)
@@ -91,6 +111,88 @@ func EmbedEXIFToJPEG(jpegPath string, exifData []byte) error {
 	}
 
 	return nil
+}
+
+// componentSize returns the byte size of a single unit of the given tag
+// type. exifcommon.TagTypePrimitive.Size() panics for UNDEFINED, so it is
+// special-cased here to the conventional 1-byte-per-unit size.
+func componentSize(tagType exifcommon.TagTypePrimitive) int {
+	if tagType == exifcommon.TypeUndefined {
+		return 1
+	}
+	return tagType.Size()
+}
+
+// buildIfdChain rebuilds an IfdBuilder chain from a parsed IFD, mirroring
+// exifv3.NewIfdBuilderFromExistingChain. Unlike that function, it skips any
+// tag whose actual raw byte length doesn't match what its declared type and
+// unit count imply. Some cameras (e.g. Apple's padded SceneType tag) write
+// non-conforming values here, and re-encoding them as-is corrupts the offsets
+// of every tag that follows, making the whole EXIF block unreadable.
+func buildIfdChain(im *exifcommon.IfdMapping, ti *exifv3.TagIndex, rootIfd *exifv3.Ifd) (*exifv3.IfdBuilder, error) {
+	var firstIb, lastIb *exifv3.IfdBuilder
+
+	for cur := rootIfd; cur != nil; cur = cur.NextIfd() {
+		ib := exifv3.NewIfdBuilder(im, ti, cur.IfdIdentity(), cur.ByteOrder())
+
+		if thumbnailData, err := cur.Thumbnail(); err == nil {
+			if err := ib.SetThumbnail(thumbnailData); err != nil {
+				return nil, err
+			}
+		}
+
+		for i, ite := range cur.Entries() {
+			if ite.IsThumbnailOffset() || ite.IsThumbnailSize() {
+				continue
+			}
+
+			if ite.ChildIfdPath() != "" {
+				var childIfd *exifv3.Ifd
+				for _, c := range cur.Children() {
+					if c.ParentTagIndex() == i {
+						childIfd = c
+						break
+					}
+				}
+				if childIfd == nil {
+					continue
+				}
+
+				childIb, err := buildIfdChain(im, ti, childIfd)
+				if err != nil {
+					return nil, err
+				}
+				if err := ib.AddChildIb(childIb); err != nil {
+					return nil, err
+				}
+				continue
+			}
+
+			rawBytes, err := ite.GetRawBytes()
+			if err != nil {
+				return nil, err
+			}
+
+			if expectedSize := componentSize(ite.TagType()) * int(ite.UnitCount()); expectedSize != len(rawBytes) {
+				continue
+			}
+
+			value := exifv3.NewIfdBuilderTagValueFromBytes(rawBytes)
+			bt := exifv3.NewBuilderTag(cur.IfdIdentity().UnindexedString(), ite.TagId(), ite.TagType(), value, cur.ByteOrder())
+			if err := ib.Add(bt); err != nil {
+				return nil, err
+			}
+		}
+
+		if firstIb == nil {
+			firstIb = ib
+		} else if err := lastIb.SetNextIb(ib); err != nil {
+			return nil, err
+		}
+		lastIb = ib
+	}
+
+	return firstIb, nil
 }
 
 // RemoveEXIFFromJPEG removes EXIF data from a JPEG file
