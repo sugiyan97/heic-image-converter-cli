@@ -8,9 +8,10 @@
 
 **解決方法**:
 - CGOが有効になっているか確認: `CGO_ENABLED=1`
-- 必要なシステムライブラリがインストールされているか確認
-  - Linux: `sudo apt-get install libheif-dev libde265-dev libx265-dev`
-  - macOS: `brew install libheif`
+- C/C++コンパイラがインストールされているか確認（`goheif`はlibde265のソースを内蔵しているため、システムの`libheif`は不要です）
+  - Linux: `sudo apt-get install build-essential`
+  - macOS: `xcode-select --install`
+  - Windows: MSYS2で`pacman -S mingw-w64-x86_64-gcc`
 
 ### 変換エラー: ファイルが見つからない
 
