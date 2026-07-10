@@ -351,12 +351,31 @@ func TestCopyEXIFFromHEICToJPEG(t *testing.T) {
 		_ = os.RemoveAll(filepath.Dir(heicFile))
 	}()
 
-	// Try to copy EXIF (may fail if HEIC EXIF extraction is not implemented)
-	err := CopyEXIFFromHEICToJPEG(heicFile, jpegFile)
-	// This may fail if EXIF extraction is not implemented, which is acceptable
-	if err != nil {
-		t.Logf("CopyEXIFFromHEICToJPEG failed (expected if not implemented): %v", err)
+	// sample/test.HEIC carries EXIF data, so it must be copied successfully.
+	if err := CopyEXIFFromHEICToJPEG(heicFile, jpegFile); err != nil {
+		t.Fatalf("CopyEXIFFromHEICToJPEG failed: %v", err)
 	}
+
+	hasEXIF, tagNames, err := CheckEXIFInJPEG(jpegFile)
+	if err != nil {
+		t.Fatalf("Failed to check EXIF: %v", err)
+	}
+	if !hasEXIF {
+		t.Errorf("Expected EXIF to be present in %s, but none was found", jpegFile)
+	}
+	if !containsTag(tagNames, "Make") {
+		t.Errorf("Expected Make tag to be present, got tags: %v", tagNames)
+	}
+}
+
+// containsTag reports whether tagNames contains the given tag.
+func containsTag(tagNames []string, tag string) bool {
+	for _, name := range tagNames {
+		if name == tag {
+			return true
+		}
+	}
+	return false
 }
 
 // TestEmbedEXIFToJPEG tests embedding EXIF into JPEG

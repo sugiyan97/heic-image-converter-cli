@@ -32,10 +32,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version: "1.25.6"
 
@@ -57,7 +57,7 @@ jobs:
         run: |
           choco install msys2 -y
           refreshenv
-          C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-libheif mingw-w64-x86_64-pkg-config"
+          C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc"
 
       - name: Build (Linux/macOS)
         if: matrix.os != 'windows-latest'
@@ -74,14 +74,12 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 1
-          CGO_CFLAGS: -IC:/tools/msys64/mingw64/include
-          CGO_LDFLAGS: -LC:/tools/msys64/mingw64/lib
         run: |
           $env:PATH = "C:\tools\msys64\mingw64\bin;C:\tools\msys64\usr\bin;$env:PATH"
           go build -ldflags "-s -w" -o bin/${{ matrix.binary_name }} ./cmd/convert
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: ${{ matrix.binary_name }}
           path: bin/${{ matrix.binary_name }}

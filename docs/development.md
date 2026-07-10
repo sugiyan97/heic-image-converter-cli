@@ -49,3 +49,7 @@ make test-coverage
 ```
 
 テストの詳細については、[test-cases.md](test-cases.md)を参照してください。
+
+## CI
+
+`.github/workflows/`配下のワークフロー（Lint / Test / Build / Release）で使用する`uses:`アクションは、サプライチェーン攻撃対策としてタグではなくコミットSHAで固定しています（例: `actions/checkout@<SHA> # v6`）。バージョンはSHAの後ろにコメントで記載しており、Dependabot（`github-actions`エコシステム）がSHAとコメントの両方を追従して更新します。手動でバージョンを上げる場合は、該当アクションのリリースタグが指すコミットSHAを調べて置き換えてください。
