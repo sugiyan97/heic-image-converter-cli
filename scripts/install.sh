@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# HEIC Image Converter インストールスクリプト (macOS)
+# HEIC Image Converter インストールスクリプト (macOS / Linux)
 
 set -e
 
@@ -12,7 +12,6 @@ NC='\033[0m' # No Color
 
 # 固定インストール先
 INSTALL_DIR="$HOME/bin/HeicConverter"
-BINARY_NAME="convert-darwin-arm64"
 UNINSTALL_SCRIPT="uninstall.sh"
 
 # メッセージ表示関数
@@ -27,6 +26,39 @@ warn() {
 error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
+
+# OS/アーキテクチャからバイナリ名を判定
+OS_NAME="$(uname -s)"
+ARCH_NAME="$(uname -m)"
+
+case "$OS_NAME" in
+    Darwin)
+        case "$ARCH_NAME" in
+            arm64)
+                BINARY_NAME="convert-darwin-arm64"
+                ;;
+            *)
+                error "サポートされていないアーキテクチャです: $OS_NAME/$ARCH_NAME"
+                exit 1
+                ;;
+        esac
+        ;;
+    Linux)
+        case "$ARCH_NAME" in
+            x86_64)
+                BINARY_NAME="convert-linux-amd64"
+                ;;
+            *)
+                error "サポートされていないアーキテクチャです: $OS_NAME/$ARCH_NAME"
+                exit 1
+                ;;
+        esac
+        ;;
+    *)
+        error "サポートされていないOSです: $OS_NAME"
+        exit 1
+        ;;
+esac
 
 # カレントディレクトリからバイナリを検出
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -66,8 +98,10 @@ info "実行権限を設定しています..."
 chmod +x "$INSTALL_DIR/heic-convert"
 
 # macOSのquarantine属性を削除
-info "quarantine属性を削除しています..."
-xattr -d com.apple.quarantine "$INSTALL_DIR/heic-convert" 2>/dev/null || true
+if [ "$OS_NAME" = "Darwin" ]; then
+    info "quarantine属性を削除しています..."
+    xattr -d com.apple.quarantine "$INSTALL_DIR/heic-convert" 2>/dev/null || true
+fi
 
 # アンインストールスクリプトのコピー
 if [ -f "$SCRIPT_DIR/$UNINSTALL_SCRIPT" ]; then

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# HEIC Image Converter アンインストールスクリプト (macOS)
+# HEIC Image Converter アンインストールスクリプト (macOS / Linux)
 
 set -e
 
