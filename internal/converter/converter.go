@@ -2,6 +2,7 @@
 package converter
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/color"
@@ -16,15 +17,28 @@ import (
 const (
 	// JPEGQuality is the quality setting for JPEG encoding (0-100)
 	JPEGQuality = 95
+
+	// maxEXIFSegmentPayload is the largest EXIF payload that can fit in a single
+	// JPEG APP1 segment. A segment's length field is 2 bytes and covers itself,
+	// so the payload (which starts with the "Exif\0\0" marker) may be at most
+	// 0xFFFF - 2 bytes.
+	maxEXIFSegmentPayload = 0xFFFF - 2
+
+	// jpegAPP1Marker is the JPEG marker used for EXIF (and XMP) segments.
+	jpegAPP1Marker = 0xE1
 )
 
 // ConvertOptions holds options for HEIC to JPEG conversion
 type ConvertOptions struct {
+	// RemoveEXIF controls whether EXIF metadata from the source HEIC file is
+	// carried over to the converted JPEG. When true, the JPEG is written
+	// without any EXIF data. When false, EXIF metadata found in the HEIC
+	// source is embedded into the output JPEG.
 	RemoveEXIF bool
 }
 
 // ConvertHEICToJPEG converts a HEIC file to JPEG format
-func ConvertHEICToJPEG(inputPath string, _ ConvertOptions) error {
+func ConvertHEICToJPEG(inputPath string, options ConvertOptions) error {
 	// Open HEIC file
 	file, err := os.Open(inputPath)
 	if err != nil {
@@ -46,6 +60,16 @@ func ConvertHEICToJPEG(inputPath string, _ ConvertOptions) error {
 	// Convert to RGBA
 	rgbaImg := convertToRGBA(img)
 
+	// Extract EXIF metadata from the source HEIC file, unless the caller
+	// asked for it to be stripped. Extraction failures (e.g. no EXIF present)
+	// are non-fatal: the conversion simply proceeds without EXIF data.
+	var exifSegment []byte
+	if !options.RemoveEXIF {
+		if exifData, exifErr := goheif.ExtractExif(file); exifErr == nil {
+			exifSegment = buildEXIFAPP1Segment(exifData)
+		}
+	}
+
 	// Generate output file path
 	outputPath := GenerateOutputPath(inputPath)
 
@@ -61,13 +85,56 @@ func ConvertHEICToJPEG(inputPath string, _ ConvertOptions) error {
 		}
 	}()
 
-	// Encode as JPEG
+	// Encode as JPEG into a buffer so an EXIF segment can be spliced in
+	// right after the SOI marker.
+	var buf bytes.Buffer
 	opts := &jpeg.Options{Quality: JPEGQuality}
-	if err := jpeg.Encode(outFile, rgbaImg, opts); err != nil {
+	if err := jpeg.Encode(&buf, rgbaImg, opts); err != nil {
 		return fmt.Errorf("JPEGファイルのエンコードに失敗しました: %w", err)
 	}
 
+	if err := writeJPEGWithEXIF(outFile, buf.Bytes(), exifSegment); err != nil {
+		return fmt.Errorf("JPEGファイルの書き込みに失敗しました: %w", err)
+	}
+
 	return nil
+}
+
+// writeJPEGWithEXIF writes JPEG data to w, inserting exifSegment (a complete
+// APP1 marker segment, or nil) immediately after the leading SOI marker.
+func writeJPEGWithEXIF(w *os.File, jpegData []byte, exifSegment []byte) error {
+	if len(exifSegment) == 0 {
+		_, err := w.Write(jpegData)
+		return err
+	}
+
+	// jpegData always starts with the 2-byte SOI marker (0xFFD8).
+	if _, err := w.Write(jpegData[:2]); err != nil {
+		return err
+	}
+	if _, err := w.Write(exifSegment); err != nil {
+		return err
+	}
+	_, err := w.Write(jpegData[2:])
+	return err
+}
+
+// buildEXIFAPP1Segment builds a complete JPEG APP1 marker segment (marker +
+// length + payload) embedding the given EXIF payload. The payload is
+// expected to already carry the "Exif\0\0" marker, as returned by
+// goheif.ExtractExif. Returns nil if there is no usable EXIF data or the
+// payload is too large to fit in a single APP1 segment.
+func buildEXIFAPP1Segment(exifData []byte) []byte {
+	if len(exifData) == 0 || len(exifData) > maxEXIFSegmentPayload {
+		return nil
+	}
+
+	length := len(exifData) + 2 // length field covers itself
+	segment := make([]byte, 0, length+2)
+	segment = append(segment, 0xFF, jpegAPP1Marker)
+	segment = append(segment, byte(length>>8), byte(length&0xFF))
+	segment = append(segment, exifData...)
+	return segment
 }
 
 // convertToRGBA converts an image to RGBA format
