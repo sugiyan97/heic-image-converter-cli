@@ -15,7 +15,7 @@ HEIC Image Converterの機能要件および非機能要件を満たしている
 ### 1.3 テスト環境
 
 - OS: macOS, Linux, Windows
-- Go: 1.23以上
+- Go: 1.25.6以上
 - テストデータ: HEIC形式の画像ファイル（EXIF情報あり/なし）
 
 ### 1.4 テスト実行方法
@@ -40,7 +40,7 @@ go test -v ./...
 
 #### テストの詳細情報
 
-- **テストファイル**: `main_test.go`に実装されています
+- **テストファイル**: `internal/`配下の各パッケージに実装されています（`internal/cli/root_test.go`、`internal/converter/converter_test.go`、`internal/exif/exif_test.go`）
 - **テストデータ**: `sample/test.HEIC`をテストデータとして使用します
 - **テスト実行時**: このファイルが一時ディレクトリに複製されて使用されます
 
