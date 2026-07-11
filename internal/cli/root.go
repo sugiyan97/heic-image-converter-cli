@@ -90,7 +90,8 @@ func runCheckEXIF(args []string) error {
 	// パスの存在確認
 	info, err := os.Stat(targetPath)
 	if err != nil {
-		return fmt.Errorf("パスが見つかりません: %w", err)
+		fmt.Printf("警告: ファイルまたはディレクトリが見つかりません: %s\n", targetPath)
+		return nil
 	}
 
 	var jpegFiles []string
@@ -140,6 +141,10 @@ func runCheckEXIF(args []string) error {
 	fmt.Printf("EXIF削除済み: %d\n", noEXIFCount)
 	fmt.Printf("EXIF残存: %d\n", hasEXIFCount)
 	fmt.Printf("エラー: %d\n", errorCount)
+
+	if hasEXIFCount > 0 {
+		return fmt.Errorf("EXIF情報が残っているファイルがあります（%d件）", hasEXIFCount)
+	}
 
 	return nil
 }
@@ -229,7 +234,7 @@ func runConvertMode(args []string) error {
 	}
 
 	if len(heicFiles) == 0 {
-		fmt.Println("変換対象のHEICファイルが見つかりませんでした。")
+		fmt.Println("HEICファイルが見つかりませんでした。")
 		return nil
 	}
 

@@ -450,7 +450,7 @@ func TestRunConvertMode_TC00602(t *testing.T) {
 	}
 }
 
-// TestRunCheckEXIF_TC00801 tests TC-008-01, TC-008-02: Check EXIF for single file
+// TestRunCheckEXIF_TC00801 tests TC-008-01: Check EXIF for single file (EXIF remains)
 func TestRunCheckEXIF_TC00801(t *testing.T) {
 	resetFlags()
 	defer resetFlags()
@@ -461,9 +461,41 @@ func TestRunCheckEXIF_TC00801(t *testing.T) {
 	tmpDir, cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
-	// First convert HEIC to JPEG
+	// First convert HEIC to JPEG, then copy EXIF over (mirrors runConvertMode's flow)
 	heicFile := filepath.Join(tmpDir, "test.HEIC")
 	options := converter.ConvertOptions{RemoveEXIF: false}
+	if err := converter.ConvertHEICToJPEG(heicFile, options); err != nil {
+		t.Fatalf("Failed to convert HEIC: %v", err)
+	}
+
+	jpegFile := converter.GenerateOutputPath(heicFile)
+	if err := exif.CopyEXIFFromHEICToJPEG(heicFile, jpegFile); err != nil {
+		t.Fatalf("Failed to copy EXIF: %v", err)
+	}
+
+	// Check EXIF
+	args := []string{jpegFile}
+	err := runCheckEXIF(args)
+	// EXIF remains, so the exit code must be non-zero (error)
+	if err == nil {
+		t.Fatal("Expected error because EXIF data remains, got nil")
+	}
+}
+
+// TestRunCheckEXIF_TC00802 tests TC-008-02: Check EXIF for single file (EXIF removed)
+func TestRunCheckEXIF_TC00802(t *testing.T) {
+	resetFlags()
+	defer resetFlags()
+
+	checkEXIF = true
+	defer resetFlags()
+
+	tmpDir, cleanup := setupTestEnvironment(t)
+	defer cleanup()
+
+	// Convert HEIC to JPEG without copying EXIF over, so no EXIF is embedded
+	heicFile := filepath.Join(tmpDir, "test.HEIC")
+	options := converter.ConvertOptions{RemoveEXIF: true}
 	if err := converter.ConvertHEICToJPEG(heicFile, options); err != nil {
 		t.Fatalf("Failed to convert HEIC: %v", err)
 	}
@@ -473,7 +505,7 @@ func TestRunCheckEXIF_TC00801(t *testing.T) {
 	// Check EXIF
 	args := []string{jpegFile}
 	err := runCheckEXIF(args)
-	// Should not error
+	// No EXIF remains, so the exit code must be zero (no error)
 	if err != nil {
 		t.Fatalf("runCheckEXIF failed: %v", err)
 	}
@@ -500,15 +532,20 @@ func TestRunCheckEXIF_TC00803(t *testing.T) {
 	for _, heicFile := range heicFiles {
 		if err := converter.ConvertHEICToJPEG(heicFile, options); err != nil {
 			t.Logf("Failed to convert %s: %v", heicFile, err)
+			continue
+		}
+		jpegFile := converter.GenerateOutputPath(heicFile)
+		if err := exif.CopyEXIFFromHEICToJPEG(heicFile, jpegFile); err != nil {
+			t.Logf("Failed to copy EXIF for %s: %v", heicFile, err)
 		}
 	}
 
 	// Check EXIF in directory
 	args := []string{tmpDir}
 	err = runCheckEXIF(args)
-	// Should not error
-	if err != nil {
-		t.Fatalf("runCheckEXIF failed: %v", err)
+	// EXIF remains in the converted files, so the exit code must be non-zero (error)
+	if err == nil {
+		t.Fatal("Expected error because EXIF data remains, got nil")
 	}
 }
 
@@ -523,9 +560,10 @@ func TestRunCheckEXIF_TC00804(t *testing.T) {
 	tmpDir, cleanup := setupTestEnvironment(t)
 	defer cleanup()
 
-	// Convert HEIC to JPEG
+	// Convert HEIC to JPEG, removing EXIF so this test stays focused on
+	// current-directory scanning rather than the exit-code behavior (covered by TC-008-01/02/03)
 	heicFile := filepath.Join(tmpDir, "test.HEIC")
-	options := converter.ConvertOptions{RemoveEXIF: false}
+	options := converter.ConvertOptions{RemoveEXIF: true}
 	if err := converter.ConvertHEICToJPEG(heicFile, options); err != nil {
 		t.Fatalf("Failed to convert HEIC: %v", err)
 	}
@@ -589,9 +627,9 @@ func TestRunCheckEXIF_TC00806(t *testing.T) {
 	args := []string{"nonexistent.jpg"}
 	err := runCheckEXIF(args)
 
-	// Should error for nonexistent file
-	if err == nil {
-		t.Fatal("Expected error for nonexistent file, got nil")
+	// A warning is printed and processing continues, so no error is returned
+	if err != nil {
+		t.Fatalf("Expected no error for nonexistent file (warning + continue), got: %v", err)
 	}
 }
 
