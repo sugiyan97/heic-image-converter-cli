@@ -43,9 +43,6 @@ func ConvertHEICToJPEG(inputPath string, _ ConvertOptions) error {
 		return fmt.Errorf("HEICファイルのデコードに失敗しました: %w", err)
 	}
 
-	// Convert to RGBA
-	rgbaImg := convertToRGBA(img)
-
 	// Generate output file path
 	outputPath := GenerateOutputPath(inputPath)
 
@@ -61,17 +58,32 @@ func ConvertHEICToJPEG(inputPath string, _ ConvertOptions) error {
 		}
 	}()
 
+	// jpeg.Encode has a fast path for *image.YCbCr and *image.Gray that writes
+	// the image directly without per-pixel color conversion. goheif.Decode
+	// always returns *image.YCbCr, so pass it straight through in that case
+	// and only fall back to an RGBA conversion for other color models (e.g.
+	// ones with an alpha channel that needs to be composited away).
+	encodeImg := img
+	switch img.(type) {
+	case *image.YCbCr, *image.Gray:
+		// Already directly encodable by jpeg.Encode; no conversion needed.
+	default:
+		encodeImg = convertToRGBA(img)
+	}
+
 	// Encode as JPEG
 	opts := &jpeg.Options{Quality: JPEGQuality}
-	if err := jpeg.Encode(outFile, rgbaImg, opts); err != nil {
+	if err := jpeg.Encode(outFile, encodeImg, opts); err != nil {
 		return fmt.Errorf("JPEGファイルのエンコードに失敗しました: %w", err)
 	}
 
 	return nil
 }
 
-// convertToRGBA converts an image to RGBA format
-// Handles different color spaces (RGBA, NRGBA, YCbCr, etc.)
+// convertToRGBA converts an image to RGBA format.
+// Handles color spaces that jpeg.Encode cannot write directly (RGBA, NRGBA,
+// and other generic image.Image implementations), notably ones with an
+// alpha channel that needs to be composited away.
 func convertToRGBA(img image.Image) image.Image {
 	switch src := img.(type) {
 	case *image.RGBA:
@@ -80,9 +92,6 @@ func convertToRGBA(img image.Image) image.Image {
 	case *image.NRGBA:
 		// Convert NRGBA to RGBA
 		return convertNRGBAToRGBA(src)
-	case *image.YCbCr:
-		// Convert YCbCr to RGBA
-		return convertYCbCrToRGBA(src)
 	default:
 		// Generic conversion for other types
 		return convertGenericToRGBA(img)
@@ -123,26 +132,6 @@ func convertNRGBAToRGBA(src *image.NRGBA) *image.RGBA {
 			dst.Pix[dstIdx+1] = uint8(g)
 			dst.Pix[dstIdx+2] = uint8(b)
 			dst.Pix[dstIdx+3] = 255
-		}
-	}
-
-	return dst
-}
-
-// convertYCbCrToRGBA converts YCbCr to RGBA
-func convertYCbCrToRGBA(src *image.YCbCr) *image.RGBA {
-	bounds := src.Bounds()
-	dst := image.NewRGBA(bounds)
-
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			r, g, b, _ := src.At(x, y).RGBA()
-			dst.SetRGBA(x, y, color.RGBA{
-				R: uint8(r >> 8),
-				G: uint8(g >> 8),
-				B: uint8(b >> 8),
-				A: 255,
-			})
 		}
 	}
 

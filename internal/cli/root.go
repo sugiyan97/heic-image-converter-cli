@@ -79,13 +79,39 @@ func runConvert(_ *cobra.Command, args []string) error {
 	return runConvertMode(args)
 }
 
-func runCheckEXIF(args []string) error {
-	var targetPath string
+// resolveTargetPath returns the path argument to operate on: args[0] if
+// provided, otherwise the current directory (".").
+func resolveTargetPath(args []string) string {
 	if len(args) > 0 {
-		targetPath = args[0]
-	} else {
-		targetPath = "."
+		return args[0]
 	}
+	return "."
+}
+
+// findFilesByType resolves the list of files to process for targetPath given
+// its already-fetched os.Stat info. If targetPath is a directory, it searches
+// recursively via findFn. If targetPath is a single file, it must satisfy isFn
+// or an error is returned. fileTypeLabel (e.g. "JPEG", "HEIC") is used to
+// build the Japanese error messages.
+func findFilesByType(targetPath string, info os.FileInfo, isFn func(string) bool, findFn func(string) ([]string, error), fileTypeLabel string) ([]string, error) {
+	if info.IsDir() {
+		// ディレクトリの場合、対象ファイルを再帰的に検索
+		files, err := findFn(targetPath)
+		if err != nil {
+			return nil, fmt.Errorf("%sファイルの検索に失敗しました: %w", fileTypeLabel, err)
+		}
+		return files, nil
+	}
+
+	// ファイルの場合
+	if !isFn(targetPath) {
+		return nil, fmt.Errorf("指定されたファイルは%sファイルではありません: %s", fileTypeLabel, targetPath)
+	}
+	return []string{targetPath}, nil
+}
+
+func runCheckEXIF(args []string) error {
+	targetPath := resolveTargetPath(args)
 
 	// パスの存在確認
 	info, err := os.Stat(targetPath)
@@ -94,20 +120,9 @@ func runCheckEXIF(args []string) error {
 		return nil
 	}
 
-	var jpegFiles []string
-	if info.IsDir() {
-		// ディレクトリの場合、JPEGファイルを再帰的に検索
-		files, err := exif.FindJPEGFiles(targetPath)
-		if err != nil {
-			return fmt.Errorf("JPEGファイルの検索に失敗しました: %w", err)
-		}
-		jpegFiles = files
-	} else {
-		// ファイルの場合
-		if !exif.IsJPEGFile(targetPath) {
-			return fmt.Errorf("指定されたファイルはJPEGファイルではありません: %s", targetPath)
-		}
-		jpegFiles = []string{targetPath}
+	jpegFiles, err := findFilesByType(targetPath, info, exif.IsJPEGFile, exif.FindJPEGFiles, "JPEG")
+	if err != nil {
+		return err
 	}
 
 	// EXIFチェック
@@ -150,12 +165,7 @@ func runCheckEXIF(args []string) error {
 }
 
 func runShowEXIF(args []string) error {
-	var targetPath string
-	if len(args) > 0 {
-		targetPath = args[0]
-	} else {
-		targetPath = "."
-	}
+	targetPath := resolveTargetPath(args)
 
 	// パスの存在確認
 	info, err := os.Stat(targetPath)
@@ -163,20 +173,9 @@ func runShowEXIF(args []string) error {
 		return fmt.Errorf("パスが見つかりません: %w", err)
 	}
 
-	var heicFiles []string
-	if info.IsDir() {
-		// ディレクトリの場合、HEICファイルを再帰的に検索
-		files, err := exif.FindHEICFiles(targetPath)
-		if err != nil {
-			return fmt.Errorf("HEICファイルの検索に失敗しました: %w", err)
-		}
-		heicFiles = files
-	} else {
-		// ファイルの場合
-		if !exif.IsHEICFile(targetPath) {
-			return fmt.Errorf("指定されたファイルはHEICファイルではありません: %s", targetPath)
-		}
-		heicFiles = []string{targetPath}
+	heicFiles, err := findFilesByType(targetPath, info, exif.IsHEICFile, exif.FindHEICFiles, "HEIC")
+	if err != nil {
+		return err
 	}
 
 	if len(heicFiles) == 0 {
@@ -204,12 +203,7 @@ func runShowEXIF(args []string) error {
 }
 
 func runConvertMode(args []string) error {
-	var targetPath string
-	if len(args) > 0 {
-		targetPath = args[0]
-	} else {
-		targetPath = "."
-	}
+	targetPath := resolveTargetPath(args)
 
 	// パスの存在確認
 	info, err := os.Stat(targetPath)
@@ -217,20 +211,9 @@ func runConvertMode(args []string) error {
 		return fmt.Errorf("パスが見つかりません: %w", err)
 	}
 
-	var heicFiles []string
-	if info.IsDir() {
-		// ディレクトリの場合、HEICファイルを再帰的に検索
-		files, err := exif.FindHEICFiles(targetPath)
-		if err != nil {
-			return fmt.Errorf("HEICファイルの検索に失敗しました: %w", err)
-		}
-		heicFiles = files
-	} else {
-		// ファイルの場合
-		if !exif.IsHEICFile(targetPath) {
-			return fmt.Errorf("指定されたファイルはHEICファイルではありません: %s", targetPath)
-		}
-		heicFiles = []string{targetPath}
+	heicFiles, err := findFilesByType(targetPath, info, exif.IsHEICFile, exif.FindHEICFiles, "HEIC")
+	if err != nil {
+		return err
 	}
 
 	if len(heicFiles) == 0 {
