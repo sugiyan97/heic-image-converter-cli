@@ -18,6 +18,18 @@ const (
 	JPEGQuality = 95
 )
 
+func init() {
+	// goheif's default decode path hands back Y/Cb/Cr slices that alias
+	// the underlying C decoder's buffer, which is freed as soon as
+	// goheif.Decode returns (via its internal defer dec.Free()). Any
+	// pixel access afterwards -- including jpeg.Encode's direct
+	// image.YCbCr fast path -- is a use-after-free that segfaults
+	// intermittently depending on whether the freed memory has been
+	// reused yet. SafeEncoding makes goheif copy the buffer into
+	// Go-managed memory (via C.GoBytes) before freeing it.
+	goheif.SafeEncoding = true
+}
+
 // ConvertOptions holds options for HEIC to JPEG conversion
 type ConvertOptions struct {
 	RemoveEXIF bool
