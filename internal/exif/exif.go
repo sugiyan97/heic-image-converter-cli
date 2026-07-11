@@ -3,6 +3,7 @@
 package exif
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,10 +11,16 @@ import (
 	"strings"
 
 	"github.com/adrium/goheif"
+	"github.com/adrium/goheif/heif"
 	exifv3 "github.com/dsoprea/go-exif/v3"
 	exifcommon "github.com/dsoprea/go-exif/v3/common"
 	jpegstructure "github.com/dsoprea/go-jpeg-image-structure/v2"
 )
+
+// ErrNoEXIF is returned by ExtractEXIFFromHEIC when the HEIC file does not
+// contain any EXIF data. Callers can use errors.Is to distinguish this from
+// an actual extraction failure (e.g. a corrupted file).
+var ErrNoEXIF = errors.New("EXIF情報が存在しません")
 
 // ExtractEXIFFromHEIC extracts EXIF data from a HEIC file
 func ExtractEXIFFromHEIC(heicPath string) ([]byte, error) {
@@ -31,12 +38,14 @@ func ExtractEXIFFromHEIC(heicPath string) ([]byte, error) {
 	// Extract EXIF data from HEIC file
 	exifBytes, err := goheif.ExtractExif(file)
 	if err != nil {
-		// EXIFが存在しない場合は空のスライスを返す
-		return nil, nil
+		if errors.Is(err, heif.ErrNoEXIF) {
+			return nil, ErrNoEXIF
+		}
+		return nil, fmt.Errorf("HEICファイルからのEXIF抽出に失敗しました: %w", err)
 	}
 
 	if len(exifBytes) == 0 {
-		return nil, nil
+		return nil, ErrNoEXIF
 	}
 
 	return exifBytes, nil
@@ -242,6 +251,12 @@ func ShowEXIFFromHEIC(heicPath string) error {
 	// Extract EXIF data from HEIC
 	exifBytes, err := ExtractEXIFFromHEIC(heicPath)
 	if err != nil {
+		if errors.Is(err, ErrNoEXIF) {
+			fmt.Printf("=== EXIF情報: %s ===\n", filepath.Base(heicPath))
+			fmt.Println("EXIF情報: なし")
+			fmt.Println()
+			return nil
+		}
 		return fmt.Errorf("HEICファイルからEXIF情報の抽出に失敗しました: %w", err)
 	}
 
@@ -452,6 +467,10 @@ func CopyEXIFFromHEICToJPEG(heicPath, jpegPath string) error {
 	// Try to extract EXIF from HEIC
 	exifData, err := ExtractEXIFFromHEIC(heicPath)
 	if err != nil {
+		if errors.Is(err, ErrNoEXIF) {
+			// No EXIF data in HEIC file
+			return nil
+		}
 		return fmt.Errorf("HEICファイルからEXIF情報の抽出に失敗しました: %w", err)
 	}
 
