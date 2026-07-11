@@ -1,6 +1,7 @@
 package exif
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -329,6 +330,47 @@ func TestExtractEXIFFromHEIC(t *testing.T) {
 	// This is expected as it's a placeholder
 	if exifData != nil {
 		t.Logf("EXIF data extracted: %d bytes", len(exifData))
+	}
+}
+
+// TestExtractEXIFFromHEIC_InvalidFile tests that a genuine extraction failure
+// (e.g. a corrupted/non-HEIC file) is reported as an error distinct from
+// ErrNoEXIF, so callers don't silently treat it as "no EXIF present".
+func TestExtractEXIFFromHEIC_InvalidFile(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	invalidFile := filepath.Join(tmpDir, "invalid.HEIC")
+	if err := os.WriteFile(invalidFile, []byte("this is not a valid HEIC file"), 0644); err != nil {
+		t.Fatalf("Failed to write invalid test file: %v", err)
+	}
+
+	exifData, err := ExtractEXIFFromHEIC(invalidFile)
+	if err == nil {
+		t.Fatal("Expected error for invalid HEIC file, got nil")
+	}
+	if errors.Is(err, ErrNoEXIF) {
+		t.Fatalf("Expected a real extraction error, got ErrNoEXIF: %v", err)
+	}
+	if exifData != nil {
+		t.Errorf("Expected nil EXIF data on error, got %d bytes", len(exifData))
+	}
+}
+
+// TestShowEXIFFromHEIC_InvalidFile tests that ShowEXIFFromHEIC surfaces a
+// genuine extraction failure as an error instead of silently reporting
+// "EXIF情報: なし".
+func TestShowEXIFFromHEIC_InvalidFile(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	invalidFile := filepath.Join(tmpDir, "invalid.HEIC")
+	if err := os.WriteFile(invalidFile, []byte("this is not a valid HEIC file"), 0644); err != nil {
+		t.Fatalf("Failed to write invalid test file: %v", err)
+	}
+
+	if err := ShowEXIFFromHEIC(invalidFile); err == nil {
+		t.Fatal("Expected error for invalid HEIC file, got nil")
 	}
 }
 
