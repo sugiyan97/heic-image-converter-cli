@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	exifv3 "github.com/dsoprea/go-exif/v3"
 	"github.com/sugiyan97/heic-image-converter-cli/internal/converter"
 	"github.com/sugiyan97/heic-image-converter-cli/internal/exif"
 )
@@ -24,6 +25,42 @@ func setupTestEnvironment(t *testing.T) (string, func()) {
 	// Copy test HEIC file
 	sourceFile := filepath.Join("..", "..", "sample", "test.HEIC")
 	destFile := filepath.Join(tmpDir, "test.HEIC")
+
+	sourceData, err := os.ReadFile(sourceFile)
+	if err != nil {
+		_ = os.RemoveAll(tmpDir)
+		t.Fatalf("Failed to read source file: %v", err)
+	}
+
+	if err := os.WriteFile(destFile, sourceData, 0644); err != nil {
+		_ = os.RemoveAll(tmpDir)
+		t.Fatalf("Failed to write test file: %v", err)
+	}
+
+	cleanup := func() {
+		_ = os.RemoveAll(tmpDir)
+	}
+
+	return tmpDir, cleanup
+}
+
+// setupTestEnvironmentNoEXIF creates a temporary directory containing a HEIC
+// file that has no EXIF data at all (sample/test_no_exif.HEIC), for TC-005-02.
+//
+// sample/test_no_exif.HEIC is the "camel.heic" fixture bundled with the
+// github.com/adrium/goheif module's own test suite (Apache License 2.0);
+// it decodes as a normal HEIC image but carries no Exif item, unlike
+// sample/test.HEIC used by the rest of this file.
+func setupTestEnvironmentNoEXIF(t *testing.T) (string, func()) {
+	t.Helper()
+
+	tmpDir, err := os.MkdirTemp("", "heic-cli-test-noexif-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+
+	sourceFile := filepath.Join("..", "..", "sample", "test_no_exif.HEIC")
+	destFile := filepath.Join(tmpDir, "test_no_exif.HEIC")
 
 	sourceData, err := os.ReadFile(sourceFile)
 	if err != nil {
@@ -961,6 +998,21 @@ func TestRunConvertMode_TC00501(t *testing.T) {
 	if !containsTag(tagNames, "Make") {
 		t.Errorf("Expected Make tag to be preserved, got tags: %v", tagNames)
 	}
+
+	// It is not enough for the tag names to merely exist: the actual values
+	// (shooting date/time, camera make/model) must round-trip byte-for-byte
+	// equal from the source HEIC to the converted JPEG.
+	srcTags := sourceEXIFTags(t, heicFile)
+	outTags := outputEXIFTags(t, outputPath)
+	for _, tag := range []string{"Make", "Model", "DateTimeOriginal"} {
+		srcVal, ok := srcTags[tag]
+		if !ok {
+			t.Fatalf("test fixture sample/test.HEIC unexpectedly has no %s tag", tag)
+		}
+		if outTags[tag] != srcVal {
+			t.Errorf("Expected %s to be preserved as %q, got %q", tag, srcVal, outTags[tag])
+		}
+	}
 }
 
 // containsTag reports whether tagNames contains the given tag.
@@ -973,15 +1025,61 @@ func containsTag(tagNames []string, tag string) bool {
 	return false
 }
 
+// exifTagValues parses raw (TIFF-structured) EXIF bytes as returned by
+// go-exif into a tag-name -> formatted-value map for convenient comparison.
+func exifTagValues(t *testing.T, rawExif []byte) map[string]string {
+	t.Helper()
+
+	entries, _, err := exifv3.GetFlatExifData(rawExif, nil)
+	if err != nil {
+		t.Fatalf("Failed to parse EXIF data: %v", err)
+	}
+
+	tags := make(map[string]string, len(entries))
+	for _, entry := range entries {
+		tags[entry.TagName] = entry.Formatted
+	}
+	return tags
+}
+
+// sourceEXIFTags extracts EXIF tag values directly from a HEIC source file.
+func sourceEXIFTags(t *testing.T, heicPath string) map[string]string {
+	t.Helper()
+
+	rawWithMarker, err := exif.ExtractEXIFFromHEIC(heicPath)
+	if err != nil {
+		t.Fatalf("Failed to extract EXIF from %s: %v", heicPath, err)
+	}
+	// goheif returns the EXIF blob with its "Exif\0\0" marker still attached;
+	// strip it down to the raw TIFF structure go-exif expects (mirrors
+	// internal/exif.EmbedEXIFToJPEG).
+	rawTiff, err := exifv3.SearchAndExtractExif(rawWithMarker)
+	if err != nil {
+		t.Fatalf("Failed to parse EXIF from %s: %v", heicPath, err)
+	}
+	return exifTagValues(t, rawTiff)
+}
+
+// outputEXIFTags extracts EXIF tag values from a converted JPEG file.
+func outputEXIFTags(t *testing.T, jpegPath string) map[string]string {
+	t.Helper()
+
+	rawTiff, err := exif.ExtractEXIFFromJPEG(jpegPath)
+	if err != nil {
+		t.Fatalf("Failed to extract EXIF from %s: %v", jpegPath, err)
+	}
+	return exifTagValues(t, rawTiff)
+}
+
 // TestRunConvertMode_TC00502 tests TC-005-02: EXIF preservation (default, without EXIF)
 func TestRunConvertMode_TC00502(t *testing.T) {
 	resetFlags()
 	defer resetFlags()
 
-	tmpDir, cleanup := setupTestEnvironment(t)
+	tmpDir, cleanup := setupTestEnvironmentNoEXIF(t)
 	defer cleanup()
 
-	heicFile := filepath.Join(tmpDir, "test.HEIC")
+	heicFile := filepath.Join(tmpDir, "test_no_exif.HEIC")
 	args := []string{heicFile}
 
 	err := runConvertMode(args)
@@ -995,8 +1093,19 @@ func TestRunConvertMode_TC00502(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	// Note: If source has no EXIF, output should also have no EXIF
-	// This test verifies conversion works regardless of EXIF presence
+	// sample/test_no_exif.HEIC carries no EXIF data, so the output JPEG must
+	// not have any EXIF segment either -- conversion must not fabricate EXIF
+	// data that wasn't in the source.
+	hasEXIF, tagNames, err := exif.CheckEXIFInJPEG(outputPath)
+	if err != nil {
+		t.Fatalf("Failed to check EXIF: %v", err)
+	}
+	if hasEXIF {
+		t.Errorf("Expected no EXIF in %s, but found tags: %v", outputPath, tagNames)
+	}
+	if len(tagNames) != 0 {
+		t.Errorf("Expected no EXIF tags, got: %v", tagNames)
+	}
 }
 
 // TestRunConvertMode_TC00503 tests TC-005-03: GPS information preservation
@@ -1028,6 +1137,20 @@ func TestRunConvertMode_TC00503(t *testing.T) {
 	}
 	if !containsTag(tagNames, "GPSLatitude") {
 		t.Errorf("Expected GPSLatitude tag to be preserved, got tags: %v", tagNames)
+	}
+
+	// Verify the GPS coordinates themselves round-trip unchanged, not just
+	// that a tag with that name happens to exist in the output.
+	srcTags := sourceEXIFTags(t, heicFile)
+	outTags := outputEXIFTags(t, outputPath)
+	for _, tag := range []string{"GPSLatitude", "GPSLatitudeRef", "GPSLongitude", "GPSLongitudeRef"} {
+		srcVal, ok := srcTags[tag]
+		if !ok {
+			t.Fatalf("test fixture sample/test.HEIC unexpectedly has no %s tag", tag)
+		}
+		if outTags[tag] != srcVal {
+			t.Errorf("Expected %s to be preserved as %q, got %q", tag, srcVal, outTags[tag])
+		}
 	}
 }
 
