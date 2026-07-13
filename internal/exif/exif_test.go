@@ -19,7 +19,7 @@ func setupTestHEICFile(t *testing.T) (string, func()) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 
-	sourceFile := filepath.Join("..", "..", "sample", "test.HEIC")
+	sourceFile := filepath.Join("..", "..", "test_images", "test.HEIC")
 	destFile := filepath.Join(tmpDir, "test.HEIC")
 
 	sourceData, err := os.ReadFile(sourceFile)
@@ -393,7 +393,7 @@ func TestCopyEXIFFromHEICToJPEG(t *testing.T) {
 		_ = os.RemoveAll(filepath.Dir(heicFile))
 	}()
 
-	// sample/test.HEIC carries EXIF data, so it must be copied successfully.
+	// test_images/test.HEIC carries EXIF data, so it must be copied successfully.
 	if err := CopyEXIFFromHEICToJPEG(heicFile, jpegFile); err != nil {
 		t.Fatalf("CopyEXIFFromHEICToJPEG failed: %v", err)
 	}
