@@ -30,7 +30,13 @@ concurrency:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      CGO_ENABLED: 1
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
@@ -39,11 +45,45 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libheif-dev libde265-dev libx265-dev pkg-config
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        timeout-minutes: 20
+        run: |
+          brew update
+          brew install libheif
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install msys2 -y
+          refreshenv
+          C:\tools\msys64\usr\bin\bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gcc"
+
+      - name: Install Go module dependencies
         run: go mod download
 
-      - name: Build
+      - name: Build (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         run: go build -v -o bin/convert ./cmd/convert
 
-      - name: Run tests
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          $env:PATH = "C:\tools\msys64\mingw64\bin;C:\tools\msys64\usr\bin;$env:PATH"
+          go build -v -o bin/convert.exe ./cmd/convert
+
+      - name: Run tests (Linux/macOS)
+        if: matrix.os != 'windows-latest'
         run: go test -v ./...
+
+      - name: Run tests (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          $env:PATH = "C:\tools\msys64\mingw64\bin;C:\tools\msys64\usr\bin;$env:PATH"
+          go test -v ./...
