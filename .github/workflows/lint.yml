@@ -11,7 +11,7 @@ on:
     paths:
       - "**/*.go"
       - "golangci.yml"
-      - ".github/workflows/lint.yml"
+      - ".github/workflows/**"
 
   # main ブランチに直接 push された時（PRを経由しない場合）
   push:
@@ -19,7 +19,7 @@ on:
     paths:
       - "**/*.go"
       - "golangci.yml"
-      - ".github/workflows/lint.yml"
+      - ".github/workflows/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
