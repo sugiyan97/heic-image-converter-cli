@@ -397,35 +397,40 @@ func TestConvertNRGBAToRGBA(t *testing.T) {
 	}
 }
 
-// TestConvertYCbCrToRGBA tests YCbCr to RGBA conversion
-func TestConvertYCbCrToRGBA(t *testing.T) {
+// TestConvertHEICToJPEG_YCbCrPassthrough verifies that ConvertHEICToJPEG
+// hands the decoded (YCbCr) image directly to jpeg.Encode instead of first
+// converting every pixel to RGBA (see issue #35). The decoded goheif output
+// is always *image.YCbCr, and jpeg.Decode also returns *image.YCbCr for the
+// resulting JPEG, so successfully round-tripping the file is enough to prove
+// no unnecessary color-space conversion is required for the common case.
+func TestConvertHEICToJPEG_YCbCrPassthrough(t *testing.T) {
 	t.Parallel()
-	// Create a test YCbCr image
-	bounds := image.Rect(0, 0, 10, 10)
-	ycbcr := image.NewYCbCr(bounds, image.YCbCrSubsampleRatio422)
+	heicFile, cleanup := setupTestFile(t)
+	defer cleanup()
 
-	// Fill with some test data
-	for y := 0; y < 10; y++ {
-		for x := 0; x < 10; x++ {
-			yi := ycbcr.YOffset(x, y)
-			ci := ycbcr.COffset(x, y)
-			ycbcr.Y[yi] = uint8((x + y) * 10)
-			ycbcr.Cb[ci] = 128
-			ycbcr.Cr[ci] = 128
+	options := ConvertOptions{RemoveEXIF: false}
+	if err := ConvertHEICToJPEG(heicFile, options); err != nil {
+		t.Fatalf("Conversion failed: %v", err)
+	}
+
+	outputPath := GenerateOutputPath(heicFile)
+	outputFile, err := os.Open(outputPath)
+	if err != nil {
+		t.Fatalf("Failed to open output file: %v", err)
+	}
+	defer func() {
+		if err := outputFile.Close(); err != nil {
+			t.Logf("Failed to close output file: %v", err)
 		}
+	}()
+
+	img, err := jpeg.Decode(outputFile)
+	if err != nil {
+		t.Fatalf("Failed to decode output JPEG: %v", err)
 	}
 
-	// Convert to RGBA
-	rgba := convertYCbCrToRGBA(ycbcr)
-
-	// Verify dimensions
-	if rgba.Bounds() != bounds {
-		t.Errorf("Bounds mismatch: got %v, want %v", rgba.Bounds(), bounds)
-	}
-
-	// Verify it's actually RGBA (rgba is already *image.RGBA)
-	if rgba == nil {
-		t.Error("convertYCbCrToRGBA returned nil")
+	if _, ok := img.(*image.YCbCr); !ok {
+		t.Fatalf("Expected decoded output to be *image.YCbCr, got %T", img)
 	}
 }
 
