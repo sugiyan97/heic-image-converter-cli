@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"image/color"
@@ -261,6 +262,10 @@ func TestJPEGQuality(t *testing.T) {
 	}
 }
 
+// exifMarker is the byte sequence that marks the start of an EXIF payload
+// inside a JPEG APP1 segment ("Exif\0\0").
+var exifMarker = []byte{'E', 'x', 'i', 'f', 0x00, 0x00}
+
 // TestConvertOptions tests conversion with different options
 func TestConvertOptions(t *testing.T) {
 	t.Parallel()
@@ -290,6 +295,73 @@ func TestConvertOptions(t *testing.T) {
 	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
+}
+
+// TestConvertOptions_RemoveEXIFTakesEffect verifies that the ConvertOptions
+// argument is actually honored by ConvertHEICToJPEG: converting with
+// RemoveEXIF=false must embed the source HEIC's EXIF metadata into the
+// output JPEG, while RemoveEXIF=true must not. This guards against the
+// options parameter being silently ignored (see issue #36).
+func TestConvertOptions_RemoveEXIFTakesEffect(t *testing.T) {
+	t.Parallel()
+
+	// Sanity check: the sample HEIC file actually carries EXIF data,
+	// otherwise this test would pass vacuously.
+	heicFile, cleanup := setupTestFile(t)
+	defer cleanup()
+	heicData, err := os.ReadFile(heicFile)
+	if err != nil {
+		t.Fatalf("Failed to read HEIC source file: %v", err)
+	}
+	if !bytes.Contains(heicData, exifMarker) {
+		t.Fatal("Sample HEIC file does not contain EXIF data; test cannot verify behavior")
+	}
+
+	t.Run("RemoveEXIF=false embeds EXIF", func(t *testing.T) {
+		t.Parallel()
+		heicFile, cleanup := setupTestFile(t)
+		defer cleanup()
+
+		options := ConvertOptions{RemoveEXIF: false}
+		if err := ConvertHEICToJPEG(heicFile, options); err != nil {
+			t.Fatalf("Conversion failed: %v", err)
+		}
+
+		outputPath := GenerateOutputPath(heicFile)
+		outputData, err := os.ReadFile(outputPath)
+		if err != nil {
+			t.Fatalf("Failed to read output file: %v", err)
+		}
+
+		if !bytes.Contains(outputData, exifMarker) {
+			t.Error("Expected output JPEG to contain EXIF data when RemoveEXIF=false, but it did not")
+		}
+
+		if _, err := jpeg.Decode(bytes.NewReader(outputData)); err != nil {
+			t.Errorf("Output file with embedded EXIF is not a valid JPEG: %v", err)
+		}
+	})
+
+	t.Run("RemoveEXIF=true omits EXIF", func(t *testing.T) {
+		t.Parallel()
+		heicFile, cleanup := setupTestFile(t)
+		defer cleanup()
+
+		options := ConvertOptions{RemoveEXIF: true}
+		if err := ConvertHEICToJPEG(heicFile, options); err != nil {
+			t.Fatalf("Conversion failed: %v", err)
+		}
+
+		outputPath := GenerateOutputPath(heicFile)
+		outputData, err := os.ReadFile(outputPath)
+		if err != nil {
+			t.Fatalf("Failed to read output file: %v", err)
+		}
+
+		if bytes.Contains(outputData, exifMarker) {
+			t.Error("Expected output JPEG to omit EXIF data when RemoveEXIF=true, but EXIF marker was found")
+		}
+	})
 }
 
 // TestConvertNRGBAToRGBA tests NRGBA to RGBA conversion
