@@ -23,7 +23,7 @@ func setupTestEnvironment(t *testing.T) (string, func()) {
 	}
 
 	// Copy test HEIC file
-	sourceFile := filepath.Join("..", "..", "sample", "test.HEIC")
+	sourceFile := filepath.Join("..", "..", "test_images", "test.HEIC")
 	destFile := filepath.Join(tmpDir, "test.HEIC")
 
 	sourceData, err := os.ReadFile(sourceFile)
@@ -45,12 +45,12 @@ func setupTestEnvironment(t *testing.T) (string, func()) {
 }
 
 // setupTestEnvironmentNoEXIF creates a temporary directory containing a HEIC
-// file that has no EXIF data at all (sample/test_no_exif.HEIC), for TC-005-02.
+// file that has no EXIF data at all (test_images/test_no_exif.HEIC), for TC-005-02.
 //
-// sample/test_no_exif.HEIC is the "camel.heic" fixture bundled with the
+// test_images/test_no_exif.HEIC is the "camel.heic" fixture bundled with the
 // github.com/adrium/goheif module's own test suite (Apache License 2.0);
 // it decodes as a normal HEIC image but carries no Exif item, unlike
-// sample/test.HEIC used by the rest of this file.
+// test_images/test.HEIC used by the rest of this file.
 func setupTestEnvironmentNoEXIF(t *testing.T) (string, func()) {
 	t.Helper()
 
@@ -59,7 +59,7 @@ func setupTestEnvironmentNoEXIF(t *testing.T) (string, func()) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 
-	sourceFile := filepath.Join("..", "..", "sample", "test_no_exif.HEIC")
+	sourceFile := filepath.Join("..", "..", "test_images", "test_no_exif.HEIC")
 	destFile := filepath.Join(tmpDir, "test_no_exif.HEIC")
 
 	sourceData, err := os.ReadFile(sourceFile)
@@ -793,7 +793,7 @@ func TestRunConvertMode_TC00305(t *testing.T) {
 
 	// Create a valid HEIC file
 	heicFile1 := filepath.Join(tmpDir, "valid.HEIC")
-	sourceFile := filepath.Join("..", "..", "sample", "test.HEIC")
+	sourceFile := filepath.Join("..", "..", "test_images", "test.HEIC")
 	sourceData, err := os.ReadFile(sourceFile)
 	if err != nil {
 		t.Fatalf("Failed to read source file: %v", err)
@@ -830,7 +830,7 @@ func TestRunConvertMode_TC00905(t *testing.T) {
 
 	// Create multiple files, one invalid
 	validFile := filepath.Join(tmpDir, "valid.HEIC")
-	sourceFile := filepath.Join("..", "..", "sample", "test.HEIC")
+	sourceFile := filepath.Join("..", "..", "test_images", "test.HEIC")
 	sourceData, err := os.ReadFile(sourceFile)
 	if err != nil {
 		t.Fatalf("Failed to read source file: %v", err)
@@ -987,7 +987,7 @@ func TestRunConvertMode_TC00501(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	// sample/test.HEIC carries EXIF data, so it must survive the conversion.
+	// test_images/test.HEIC carries EXIF data, so it must survive the conversion.
 	hasEXIF, tagNames, err := exif.CheckEXIFInJPEG(outputPath)
 	if err != nil {
 		t.Fatalf("Failed to check EXIF: %v", err)
@@ -1007,7 +1007,7 @@ func TestRunConvertMode_TC00501(t *testing.T) {
 	for _, tag := range []string{"Make", "Model", "DateTimeOriginal"} {
 		srcVal, ok := srcTags[tag]
 		if !ok {
-			t.Fatalf("test fixture sample/test.HEIC unexpectedly has no %s tag", tag)
+			t.Fatalf("test fixture test_images/test.HEIC unexpectedly has no %s tag", tag)
 		}
 		if outTags[tag] != srcVal {
 			t.Errorf("Expected %s to be preserved as %q, got %q", tag, srcVal, outTags[tag])
@@ -1093,7 +1093,7 @@ func TestRunConvertMode_TC00502(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	// sample/test_no_exif.HEIC carries no EXIF data, so the output JPEG must
+	// test_images/test_no_exif.HEIC carries no EXIF data, so the output JPEG must
 	// not have any EXIF segment either -- conversion must not fabricate EXIF
 	// data that wasn't in the source.
 	hasEXIF, tagNames, err := exif.CheckEXIFInJPEG(outputPath)
@@ -1130,7 +1130,7 @@ func TestRunConvertMode_TC00503(t *testing.T) {
 		t.Fatalf("Output file was not created: %s", outputPath)
 	}
 
-	// sample/test.HEIC carries GPS data, so it must survive the conversion.
+	// test_images/test.HEIC carries GPS data, so it must survive the conversion.
 	_, tagNames, err := exif.CheckEXIFInJPEG(outputPath)
 	if err != nil {
 		t.Fatalf("Failed to check EXIF: %v", err)
@@ -1146,7 +1146,7 @@ func TestRunConvertMode_TC00503(t *testing.T) {
 	for _, tag := range []string{"GPSLatitude", "GPSLatitudeRef", "GPSLongitude", "GPSLongitudeRef"} {
 		srcVal, ok := srcTags[tag]
 		if !ok {
-			t.Fatalf("test fixture sample/test.HEIC unexpectedly has no %s tag", tag)
+			t.Fatalf("test fixture test_images/test.HEIC unexpectedly has no %s tag", tag)
 		}
 		if outTags[tag] != srcVal {
 			t.Errorf("Expected %s to be preserved as %q, got %q", tag, srcVal, outTags[tag])

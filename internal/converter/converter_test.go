@@ -23,8 +23,8 @@ func setupTestFile(t *testing.T) (string, func()) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 
-	// Copy test file from sample directory
-	sourceFile := filepath.Join("..", "..", "sample", "test.HEIC")
+	// Copy test file from test_images directory
+	sourceFile := filepath.Join("..", "..", "test_images", "test.HEIC")
 	destFile := filepath.Join(tmpDir, "test.HEIC")
 
 	sourceData, err := os.ReadFile(sourceFile)
@@ -364,6 +364,29 @@ func TestConvertOptions_RemoveEXIFTakesEffect(t *testing.T) {
 	})
 }
 
+// TestConvertToRGBA_RGBAPassthrough tests TD-005 / TC-010-01: convertToRGBA's
+// *image.RGBA branch, which returns the source image unchanged. This is the
+// one dispatch branch in convertToRGBA that TestConvertToRGBA_TC01001 doesn't
+// exercise, since goheif never decodes to *image.RGBA (real HEIC files can't
+// be used to reach this branch; see issue #30).
+func TestConvertToRGBA_RGBAPassthrough(t *testing.T) {
+	t.Parallel()
+
+	bounds := image.Rect(0, 0, 10, 10)
+	src := image.NewRGBA(bounds)
+	src.SetRGBA(5, 5, color.RGBA{R: 10, G: 20, B: 30, A: 255})
+
+	result := convertToRGBA(src)
+
+	rgba, ok := result.(*image.RGBA)
+	if !ok {
+		t.Fatalf("Expected *image.RGBA, got %T", result)
+	}
+	if rgba != src {
+		t.Error("Expected convertToRGBA to return the *image.RGBA input unchanged (same pointer)")
+	}
+}
+
 // TestConvertNRGBAToRGBA tests NRGBA to RGBA conversion
 func TestConvertNRGBAToRGBA(t *testing.T) {
 	t.Parallel()
@@ -510,6 +533,44 @@ func TestConvertHEICToJPEG_TC00205(t *testing.T) {
 	}
 }
 
+// TestConvertHEICToJPEG_TD006 tests TD-006 (corrupted HEIC test data) using
+// test_images/corrupted.HEIC, a real HEIC file truncated mid-stream. Unlike
+// TestConvertHEICToJPEG_TC00205's plain-text fake, this file still has a
+// valid ftyp/meta box structure (goheif gets far enough to start reading the
+// bitstream before hitting EOF), which is a more realistic corruption
+// scenario and exercises a different failure path in the decoder.
+func TestConvertHEICToJPEG_TD006(t *testing.T) {
+	t.Parallel()
+
+	tmpDir, err := os.MkdirTemp("", "heic-converter-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
+
+	sourceFile := filepath.Join("..", "..", "test_images", "corrupted.HEIC")
+	sourceData, err := os.ReadFile(sourceFile)
+	if err != nil {
+		t.Fatalf("Failed to read corrupted fixture: %v", err)
+	}
+
+	corruptedFile := filepath.Join(tmpDir, "corrupted.HEIC")
+	if err := os.WriteFile(corruptedFile, sourceData, 0644); err != nil {
+		t.Fatalf("Failed to write corrupted file: %v", err)
+	}
+
+	options := ConvertOptions{RemoveEXIF: false}
+	if err := ConvertHEICToJPEG(corruptedFile, options); err == nil {
+		t.Fatal("Expected error for truncated HEIC file, got nil")
+	}
+
+	if _, err := os.Stat(GenerateOutputPath(corruptedFile)); !os.IsNotExist(err) {
+		t.Error("Output file should not be created for a corrupted source")
+	}
+}
+
 // TestConvertHEICToJPEG_TC01501 tests TC-015-01: Performance - conversion speed
 func TestConvertHEICToJPEG_TC01501(t *testing.T) {
 	heicFile, cleanup := setupTestFile(t)
@@ -544,7 +605,7 @@ func TestConvertHEICToJPEG_TC01502(t *testing.T) {
 	}()
 
 	// Create multiple test files
-	sourceFile := filepath.Join("..", "..", "sample", "test.HEIC")
+	sourceFile := filepath.Join("..", "..", "test_images", "test.HEIC")
 	sourceData, err := os.ReadFile(sourceFile)
 	if err != nil {
 		t.Fatalf("Failed to read source file: %v", err)

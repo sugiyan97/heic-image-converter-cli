@@ -41,7 +41,7 @@ go test -v ./...
 #### テストの詳細情報
 
 - **テストファイル**: `internal/`配下の各パッケージに実装されています（`internal/cli/root_test.go`、`internal/converter/converter_test.go`、`internal/exif/exif_test.go`）
-- **テストデータ**: `sample/test.HEIC`をテストデータとして使用します
+- **テストデータ**: `test_images/test.HEIC`をテストデータとして使用します
 - **テスト実行時**: このファイルが一時ディレクトリに複製されて使用されます
 
 #### テストの内容
@@ -579,36 +579,43 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 - EXIF情報を含む
 - 一般的なサイズ（数MB程度）
 - 正常にデコード可能
+- **充足済み**: `test_images/test.HEIC`（実機（iPhone 15 Pro）で撮影、約3.5MB）
 
 #### TD-002: EXIF情報なしのHEICファイル
 
 - EXIF情報を含まない
 - 正常にデコード可能
+- **充足済み**: `test_images/test_no_exif.HEIC`（`goheif`モジュール付属の`camel.heic`フィクスチャ、Apache License 2.0）
 
 #### TD-003: GPS情報を含むHEICファイル
 
 - GPS情報を含むEXIF情報を持つ
 - 正常にデコード可能
+- **充足済み**: `test_images/test.HEIC`は撮影時のGPS情報（GPSLatitude/GPSLongitude等）を含んでおり、`TestRunConvertMode_TC00503`（`internal/cli/root_test.go`）で保持を検証済み
 
 #### TD-004: アルファチャンネルを含むHEICファイル
 
 - 透明度情報を含む
 - 正常にデコード可能
+- **対応保留**: `goheif.Decode`が常に`*image.YCbCr`を返しアルファ情報を読み捨てるため、REQ-010が要求する「白背景への合成」は実際のHEICデコード経路では機能しない（[Issue #50](https://github.com/sugiyan97/heic-image-converter-cli/issues/50)）。バグ修正の方針が決まってから、実際のアルファ付きHEICフィクスチャを追加する
 
 #### TD-005: 異なる色空間のHEICファイル
 
 - RGBA、NRGBA、YCbCrなど異なる色空間
 - 正常にデコード可能
+- **充足済み（単体テストで代替）**: `goheif`は常に`*image.YCbCr`を返すため、実ファイルでRGBA/NRGBAバリエーションを用意することはできない。`internal/converter/converter_test.go`で`image.Image`をコード上で生成し、`convertToRGBA`の各分岐（RGBA/NRGBA/汎用）とYCbCrパススルーを個別に検証している（`TestConvertToRGBA_RGBAPassthrough`, `TestConvertNRGBAToRGBA`, `TestConvertGenericToRGBA`, `TestConvertHEICToJPEG_YCbCrPassthrough`）
 
 #### TD-006: 破損したHEICファイル
 
 - デコード不可能なファイル
 - エラーハンドリングのテスト用
+- **充足済み**: `test_images/corrupted.HEIC`（`test.HEIC`を100KBで切り詰めた実データ。ftyp/metaボックスは有効なままmdat途中で終端しており、非HEICのゴミデータより現実的な破損シナリオ）を`TestConvertHEICToJPEG_TD006`で使用
 
 #### TD-007: 大きなHEICファイル
 
 - 数十MB程度の大きなファイル
 - パフォーマンステスト用
+- **対応不要と判断**: 数十MBのバイナリをリポジトリに追加するコストに見合わないため、専用フィクスチャは用意しない。`TC-015-01`/`TC-016-01`は既存の`test.HEIC`（約3.5MB）で代替し、真の大容量ファイルでの検証は手動テストに委ねる
 
 ## 4. テスト実行計画
 
