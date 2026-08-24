@@ -163,6 +163,15 @@ func buildEXIFAPP1Segment(exifData []byte) []byte {
 // Handles color spaces that jpeg.Encode cannot write directly (RGBA, NRGBA,
 // and other generic image.Image implementations), notably ones with an
 // alpha channel that needs to be composited away.
+//
+// goheif.Decode never actually returns these types -- it always decodes to
+// *image.YCbCr (or *image.Gray), regardless of the source HEIC's real color
+// space or alpha channel, since goheif reads no alpha/auxiliary image data
+// at all. This function (and its alpha compositing) is therefore unreachable
+// from ConvertHEICToJPEG today; see docs/requirements.md REQ-010 and
+// https://github.com/sugiyan97/heic-image-converter-cli/issues/50. It is
+// kept, and unit-tested directly, in case a future goheif release or
+// alternate decode path produces these color models.
 func convertToRGBA(img image.Image) image.Image {
 	switch src := img.(type) {
 	case *image.RGBA:

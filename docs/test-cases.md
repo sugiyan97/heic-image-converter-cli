@@ -441,29 +441,29 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 
 ### 2.10 REQ-010: 色空間変換
 
+> **既知の制限（[Issue #50](https://github.com/sugiyan97/heic-image-converter-cli/issues/50)）**: デコードに使用する `github.com/adrium/goheif` は、ソースHEICの実際の色空間・アルファ有無によらず常に `*image.YCbCr`（グレースケール画像の場合は `*image.Gray`）を返す。そのため TC-010-01・TC-010-02・TC-010-04 が前提とする「RGBA/NRGBA/アルファ付きHEICファイル」を実際の`heic-convert`実行経路（goheif.Decode）で再現することはできない。これらのテストケースは `internal/converter` 内の変換ロジック（`convertToRGBA`, `convertNRGBAToRGBA`, `convertGenericToRGBA`）を単体テストレベルで検証するものとして扱う（`TestConvertToRGBA_TC01001`, `TestConvertNRGBAToRGBA`, `TestConvertGenericToRGBA`, `TestConvertToRGBA_RGBAPassthrough` 参照）。goheif側でアルファ対応が行われない限り、実HEICファイルによるE2E回帰テストの追加は見送る。
+
 #### TC-010-01: 正常系 - RGBA色空間のHEICファイルを変換
 
-- **前提条件**: RGBA色空間のHEICファイルが存在する
-- **入力**: `heic-convert test.HEIC`
+- **前提条件**: （単体テストレベル）RGBA色空間の画像データが存在する。goheif.Decodeは実際には`*image.RGBA`を返さないため、`convertToRGBA`のRGBA分岐を直接検証する
+- **入力**: `convertToRGBA`にRGBA画像を渡す
 - **期待結果**:
   - 変換が成功する
-  - 出力JPEGファイルが正しく生成される
   - 画像の色が正しく変換される
 - **優先度**: 高
 
 #### TC-010-02: 正常系 - NRGBA色空間のHEICファイルを変換
 
-- **前提条件**: NRGBA色空間のHEICファイルが存在する
-- **入力**: `heic-convert test.HEIC`
+- **前提条件**: （単体テストレベル）NRGBA色空間の画像データが存在する。goheif.Decodeは実際には`*image.NRGBA`を返さないため、`convertNRGBAToRGBA`を直接検証する
+- **入力**: `convertNRGBAToRGBA`にNRGBA画像を渡す
 - **期待結果**:
   - 変換が成功する
-  - 出力JPEGファイルが正しく生成される
   - 画像の色が正しく変換される
 - **優先度**: 高
 
 #### TC-010-03: 正常系 - YCbCr色空間のHEICファイルを変換
 
-- **前提条件**: YCbCr色空間のHEICファイルが存在する
+- **前提条件**: YCbCr色空間のHEICファイルが存在する（goheif.Decodeの実際の出力型であり、実HEICファイルでE2E検証可能）
 - **入力**: `heic-convert test.HEIC`
 - **期待結果**:
   - 変換が成功する
@@ -473,12 +473,11 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 
 #### TC-010-04: 正常系 - アルファチャンネルがあるHEICファイルを変換
 
-- **前提条件**: アルファチャンネル（透明度）を含むHEICファイルが存在する
-- **入力**: `heic-convert test.HEIC`
+- **前提条件**: （単体テストレベル）アルファチャンネル（透明度）を含む画像データが存在する。goheifがアルファ情報を読み取らないため、実HEICファイルでの白背景合成はE2Eでは再現できない。`convertNRGBAToRGBA`/`convertGenericToRGBA`のアルファ合成分岐を直接検証する
+- **入力**: `convertNRGBAToRGBA` / `convertGenericToRGBA`にアルファ付き画像を渡す
 - **期待結果**:
   - 変換が成功する
   - アルファチャンネルが白背景に合成される
-  - 出力JPEGファイルが正しく生成される
 - **優先度**: 高
 
 ### 2.11 コマンドラインインターフェース（REQ-019）
@@ -597,7 +596,7 @@ Pull Requestを作成すると、自動的にlintとtestが実行されます。
 
 - 透明度情報を含む
 - 正常にデコード可能
-- **対応保留**: `goheif.Decode`が常に`*image.YCbCr`を返しアルファ情報を読み捨てるため、REQ-010が要求する「白背景への合成」は実際のHEICデコード経路では機能しない（[Issue #50](https://github.com/sugiyan97/heic-image-converter-cli/issues/50)）。バグ修正の方針が決まってから、実際のアルファ付きHEICフィクスチャを追加する
+- **充足済み（単体テストで代替、実ファイルは用意しない）**: `goheif.Decode`が常に`*image.YCbCr`を返しアルファ情報を読み捨てるため、REQ-010が要求する「白背景への合成」は実際のHEICデコード経路では到達しない（[Issue #50](https://github.com/sugiyan97/heic-image-converter-cli/issues/50)）。goheif側でアルファ対応が行われない限り実HEICフィクスチャの追加による意味のあるE2E検証はできないため、TD-005と同様に`internal/converter/converter_test.go`のコード生成画像による単体テスト（`TestConvertNRGBAToRGBA`, `TestConvertGenericToRGBA`）で合成ロジックの正しさを担保する方針とする
 
 #### TD-005: 異なる色空間のHEICファイル
 
